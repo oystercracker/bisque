@@ -1,7 +1,7 @@
 Bisque
 ========
 
-Write your language model once and compile it for multiple platforms.
+Write your language model once and cross-compile it for Alexa and Google/Dialogflow.
 
 ## Installation
 
@@ -57,6 +57,8 @@ const manifest = {
 module.exports = manifest;
 ```
 
+A complete JSON schema for the Bisque manifest is located in `schemas/manifest.js`.
+
 In the same directory, a file called `language-model` will also appear and include some basic intent names.  Notice how it is required in the `manifest.js`.  
 
 It should look something like this:
@@ -89,6 +91,32 @@ const languageModel = {
 module.exports = languageModel;
 ```
 
+A complete JSON schema for the Bisque language model is located in `schemas/language-model.js`.
+
+## CLI Commands
+
+### Help
+
+Running `bisque` or `bisque help` will list available commands.
+
+### Build
+
+To build out platform-specific language models and manifests, as configured in `manifest.js` under the `targetPlatform` property:
+
+```sh
+bisque build
+```
+
+In the `outputDirectory`, directories for each target platform will appear with their respective manifest files and language models.
+
+### Validate
+
+To validate your manifest and language model to make sure its properties are valid:
+
+```sh
+bisque validate
+```
+
 ## Configuration Concepts
 
 Intended allows flexible locale and platform targeting.
@@ -114,9 +142,11 @@ Making a "hello world" app?  You can set your invocation in the `description` ob
 
 Every platform-specific manifests that gets built out(e.g. skill.json, action.json) will include "hello world" as the invocation phrase.
 
-### Targeting locales
+### Resovler Objects
 
-If your application is multi-lingual, you can easily configure unique invocation phrases for different locales:
+If your application is multi-lingual, you can easily configure unique invocation phrases for different locales by turning the property value a **resolver object**.
+
+Let's use the `byLocale` resolver property to specify different invocation phrases depending on what locale is being targeted:
 
 ```javascript
 // manifest.js
@@ -135,7 +165,7 @@ If your application is multi-lingual, you can easily configure unique invocation
 }
 ```
 
-Or perhaps if the invocation should be different for each platform:
+Similarly, `byPlatform` can be used to specify different values depending on the targeted platform (e.g. alexa, google):
 
 ```javascript
 // manifest.js
@@ -153,7 +183,7 @@ Or perhaps if the invocation should be different for each platform:
 }
 ```
 
-Even specific versions for each locale can be set for each platform:
+Default values can be applied using the `default` property:
 
 ```javascript
 // manifest.js
@@ -161,19 +191,30 @@ Even specific versions for each locale can be set for each platform:
   //...
   description: {
     invocation: {
+      default: 'hello world',
       byPlatform: {
-        alexa: {
-          byLocale: {
-            'en-US': 'hello world',
-            'de-DE': 'hallo welt',
-            'fr-FR': 'bonjour le monde'
-          }
-        },
+        google: 'whats up'
+      }
+    }
+  }
+  // ...
+}
+```
+
+Resolver objects can also contain other resolver objects:
+
+```javascript
+// manifest.js
+{
+  //...
+  description: {
+    invocation: {
+      default: 'hello world',
+      byPlatform: {
         google: {
           byLocale: {
             'en-US': 'whats up',
-            'de-DE': 'was geht',
-            'fr-FR': 'quoi de neuf'
+            'en-AU': "g'day mate"
           }
         }
       }
@@ -183,7 +224,34 @@ Even specific versions for each locale can be set for each platform:
 }
 ```
 
-Keep in mind that while all properties support `byPlatform`, not all properties are locale-specific in their target platforms, thus `byLocale` is not always supported.
+In the above example, an application published for Google will by activated by "hello world", "whats up", and "g'day mate"  invocations, depending on the user's locale.  For all other platforms, the application will be invoked with only "hello world".
+
+## Using Functions
+
+Want more flexibility than what can be offered by resolver objects?  You can also turn properties into functions.
+
+Let's say we want to an application to have different summaries when listed in the stores of different platforms:
+
+```javascript
+// manifest.js
+{
+  //...
+  description: {
+    shortSummary(platform) {
+      if(platform === 'alexa'){
+        return 'A fun skill for your Echo Dot'.
+      } else if(platform === 'google') {
+        return 'A fun action for your Google Home';
+      }
+      return 'A fun voice activated app for your smart speaker.';
+    }
+  }
+  // ...
+}
+```
+
+If your function returns another function, that one will also be evaluated.  Similarly, if it returns an object, any functions in that object will be evaluated as well.
+
 
 ## Adding intents
 
@@ -220,6 +288,25 @@ const languageModel = {
           'de-DE': ['hallo welt'],
           'fr-FR': ['bonjour le monde']
         }
+      }
+    }
+  },
+// ...
+};
+```
+
+Here's the same language model using a function:
+
+```javascript
+const languageModel = {
+  intents: {
+    HelloWorld: {
+      patterns(platform, locale) {
+        return({
+          'en-US': ['hello world'],
+          'de-DE': ['hallo welt'],
+          'fr-FR': ['bonjour le monde']
+        })[locale];
       },
     }
   },
@@ -227,7 +314,7 @@ const languageModel = {
 };
 ```
 
-What if we're targeting mostly English locales but one non-English locale?  That's where the `default` property comes in:
+What if we're targeting mostly English locales but one non-English locale?  That's where the `default` resolver object property comes in:
 
 ```javascript
 const languageModel = {

@@ -2,91 +2,112 @@
 
 'use strict';
 
+const { entries }      = Object,
+      { stringify }    = JSON,
+      { writeFileSync,
+        mkdirSync,
+        existsSync,
+        readdirSync,
+        lstatSync,
+        unlinkSync,
+        rmdirSync }    = require('fs');
+
 function help(){
   const packageJSON = require('../package.json');
   console.log(`
-    Usage:  intended COMMAND
+    Usage:  bisque COMMAND
     Build models for multi-platform, multi-locale language models.
     Commands:
       init               Create a new manifest file w/ language model.
-      validate           Validates the manifest file.
+      validate           Validates the manifest and language model.
       build              Build out platform-specific models and manifests.
       generate           Generate an element of the language model.
       help               Shows help text.
     Version: ${packageJSON.version}
   `);
 }
-
+/**
+ * Initializes a new set of Bisuqe manifest and model files.
+ */
 function init(){
   const defaults = require('json-schema-defaults'),
         manifest = require(`../schemas/manifest`),
         output   = defaults(manifest);
   console.log(output);
 }
-
-function silentValidate(){
-  const { validateManifest } = require('../index'),
-          manifest           = require(`${process.cwd()}/manifest.js`),
-          errors             = validateManifest(manifest);
-  if(errors) return errors;
+/**
+ * Find manifest and language model from files.
+ * Will default to language model to the object under the `languageModel` property
+ * in the manifest if it exists.
+ */
+function loadAssets(){
+  let manifest, languageModel;
+  try {
+    manifest = require(`${process.cwd()}/bisque-manifest`);
+  } catch (e) {
+    if(e && e.code !== 'MODULE_NOT_FOUND') throw e;
+  }
+  try {
+    languageModel = require(`${process.cwd()}/bisque-model`);
+  } catch (e) {
+    if(e && e.code !== 'MODULE_NOT_FOUND') throw e;
+  }
+  languageModel = languageModel || (manifest || {}).languageModel;
+  return { manifest, languageModel };
+}
+/**
+ * Expand out versions of the manifest and language model
+ * based on targeted platforms and locales.
+ */
+function expand(){
+  const { expandAssets } = require('../index'),
+        { manifest,
+          languageModel } = loadAssets();
+  return expandAssets(manifest, languageModel);
 }
 
 function validate(){
-  const errors = silentValidate();
+  const { errors } = expand();
   if(errors) return console.error(errors.join('\n'));
-  console.log('Manifest file is valid.');
+  console.log('Manifest and language model are valid.');
 }
 
 function generate(args){
   const recast         = require('recast'),
       { readFileSync } = require('fs'),
-        source         = readFileSync(`${process.cwd()}/language-model.js`, 'utf8'),
+        source         = readFileSync(`${process.cwd()}/bisque-model.js`, 'utf8'),
         ast            = recast.parse(source);
-  debugger
+}
+/**
+ * rm -rf implemented for Node.js
+ */
+function rmrf(path) {
+  if(!existsSync(path)) return;
+  readdirSync(path).forEach(file => {
+    const curPath = path + '/' + file;
+    if(lstatSync(curPath).isDirectory()) return rmrf(curPath);
+    unlinkSync(curPath);
+  });
+  rmdirSync(path);
 }
 
 function build(){
-  const errors = silentValidate();
-  if(errors) {
-    console.error(errors.join('\n'));
-    throw new Error('Manifest failed to validate before building.');
-  }
-  const { build }        = require('../index'),
-          manifest       = require(`${process.cwd()}/manifest.js`),
-          buildOut       = build(manifest),
-        { entries }      = Object,
-        { stringify }    = JSON,
-        { writeFileSync,
-          mkdirSync,
-          existsSync,
-          readdirSync,
-          lstatSync,
-          unlinkSync,
-          rmdirSync }    = require('fs'),
-          outputDir      = `${process.cwd()}/${manifest.outputDir || 'dist'}`;
-
-  function rmrf(path) {
-    if(!existsSync(path)) return;
-    readdirSync(path).forEach(file => {
-      const curPath = path + '/' + file;
-      if(lstatSync(curPath).isDirectory()) return rmrf(curPath);
-      unlinkSync(curPath);
+  const { build } = require('../index'),
+        { errors, assets } = expand();
+  if(errors) return console.error(errors.join('\n'));
+  entries(assets).forEach(([platform, assets]) => {
+    const { manifest, models } = build(platform, assets),
+            outputDir = `${process.cwd()}/${assets.manifest.outputDir || 'dist'}`;
+    if(platform !== 'alexa') return;
+    rmrf(`${outputDir}/`);
+    if(!existsSync(outputDir)) mkdirSync(outputDir);
+    mkdirSync(`${outputDir}/alexa`);
+    mkdirSync(`${outputDir}/alexa/models`);
+    entries(models).forEach(([locale, model]) => {
+      writeFileSync(`${outputDir}/alexa/models/${locale}.json`, stringify(model, null, 2), 'utf8');
     });
-    rmdirSync(path);
-  }
-
-  rmrf(`${outputDir}/`);
-
-  if(!existsSync(outputDir)) mkdirSync(outputDir);
-
-  mkdirSync(`${outputDir}/alexa`);
-  mkdirSync(`${outputDir}/alexa/models`);
-
-  entries(buildOut.alexa.models).forEach(([locale, model]) => {
-    writeFileSync(`${outputDir}/alexa/models/${locale}.json`, stringify(model, null, 2), 'utf8');
+    writeFileSync(`${outputDir}/alexa/skill.json`, stringify(manifest, null, 2), 'utf8');
   });
-
-  writeFileSync(`${outputDir}/alexa/skill.json`, stringify(buildOut.alexa.manifest, null, 2), 'utf8');
 }
 
 function inspectSchema(args){
@@ -103,7 +124,7 @@ function inspectSchema(args){
     if(!obj) return obj;
     ctx = obj;
   }
-  console.log(JSON.stringify(ctx, null, 2));
+  console.log(stringify(ctx, null, 2));
 }
 
 const functions = {
@@ -116,6 +137,6 @@ const functions = {
       },
       args = require('minimist')(process.argv.slice(2));
 
-if(args._[0]) return functions[args._[0]](args);
+if(args._[0] && functions[args._[0]]) return functions[args._[0]](args);
 functions.help();
 

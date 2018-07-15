@@ -5,39 +5,36 @@ const languageModel = {
   sampleInvocations: [],
   intents: {
     Launch: {
-      mapToRequestType: {
-        byPlatform: {
-          alexa: 'LaunchRequest'
+      mapToRequestType(platform, locale){
+        if(platform === 'alexa'){
+          return 'LaunchRequest';
+        } else {
+          return '';
         }
       }
     },
     Stop: {
-      alias: {
-        byPlatform: {
-          alexa: 'AMAZON.StopIntent'
-        }
+      alias(platform){
+        if(platform === 'alexa') return 'AMAZON.StopIntent';
       },
-      patterns: {
-        byLocale: {
-          'en-US': [
+      patterns(platform, locale){
+        if(locale === 'en-US'){
+          return [
             'stop',
             'off',
             'shut up'
-          ],
-          'fr-FR': [
-            'arrête'
-          ]
+          ];
         }
+        if(locale === 'fr-FR') return ['arrête'];
+        return [];
       }
     },
     Cancel: {
-      alias: {
-        byPlatform: {
-          alexa: 'AMAZON.CancelIntent'
-        }
+      alias(platform){
+        if(platform === 'alexa') return 'AMAZON.CancelIntent'
       },
-      patterns: {
-        byLocale: {
+      patterns(platform, locale){
+        return ({
           'en-US': [
             'cancel',
             'nevermind',
@@ -52,17 +49,15 @@ const languageModel = {
             'abbreche',
             'vergiss es'
           ]
-        }
+        })[locale];
       }
     },
     Help: {
-      alias: {
-        byPlatform: {
-          alexa: 'AMAZON.HelpIntent'
-        }
+      alias(platform){
+        if(platform === 'alexa') return 'AMAZON.HelpIntent';
       },
-      patterns: {
-        byLocale: {
+      patterns(platform, locale){
+        return ({
           'en-US': [
             'help',
             'help me',
@@ -79,29 +74,23 @@ const languageModel = {
             'hilf mir',
             'Kannst du mir helfen'
           ]
-        }
+        })[locale];
       },
       slots: {
         numbah: {
-          type: {
-            default: 'FooBar',
-            byLocale: {
-              'en-US': 'Number'
-            }
+          type(platform, locale){
+            if(locale === 'en-US') return 'Number';
+            return 'FooBar';
           },
-          patterns: {
-            byLocale: {
-              'en-US': ['love me some {numbah}']
-            }
+          patterns(platform, locale){
+            if(locale === 'en-US') return ['love me some {numbah}'];
           }
         }
       }
     },
     Fallback: {
-      alias: {
-        byPlatform: {
-          alexa: 'AMAZON.FallbackIntent'
-        }
+      alias(platform){
+        if(platform === 'alexa') return 'AMAZON.FallbackIntent';
       }
     }
   },

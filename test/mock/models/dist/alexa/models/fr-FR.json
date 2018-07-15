@@ -6,36 +6,30 @@
         {
           "name": "AMAZON.StopIntent",
           "samples": [
-            "stop",
-            "off",
-            "shut up"
+            "arrête"
           ],
           "slots": []
         },
         {
           "name": "AMAZON.CancelIntent",
           "samples": [
-            "cancel",
-            "nevermind",
-            "forget it"
+            "annule",
+            "cancelle"
           ],
           "slots": []
         },
         {
           "name": "AMAZON.HelpIntent",
           "samples": [
-            "help",
-            "help me",
-            "can you help me",
-            "a {numbah}"
+            "aide",
+            "aide moi",
+            "j'ai besoin d'aide"
           ],
           "slots": [
             {
               "name": "numbah",
-              "type": "Number",
-              "samples": [
-                "love me some {numbah}"
-              ]
+              "type": "FooBar",
+              "samples": []
             }
           ]
         },

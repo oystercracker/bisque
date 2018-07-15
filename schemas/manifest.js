@@ -1,8 +1,6 @@
 'use strict';
 
-const resolves    = require('../lib/schema-resolves'),
-      makeDefault = require('../lib/schema-make-default'),
-      VERSION     = '1.0';
+const VERSION = '1.0';
 
 module.exports = {
   type: 'object',
@@ -24,7 +22,7 @@ module.exports = {
         VERSION
       ]
     },
-    description: makeDefault(resolves({
+    description: {
       type: [
         'object'
       ],
@@ -32,7 +30,7 @@ module.exports = {
       description: 'A description of the application, used by platforms when publishing.',
       default: {},
       properties: {
-        name: resolves({
+        name: {
           type: [
             'string'
           ],
@@ -42,8 +40,8 @@ module.exports = {
           examples: [
             'Hello World'
           ]
-        }),
-        shortSummary: resolves({
+        },
+        shortSummary: {
           type: [
             'string'
           ],
@@ -53,8 +51,8 @@ module.exports = {
           examples: [
             'Hello World says \'hello world\' to you.'
           ]
-        }),
-        longSummary: resolves({
+        },
+        longSummary: {
           type: [
             'string'
           ],
@@ -64,22 +62,22 @@ module.exports = {
           examples: [
             'Hello World says \'hello world\' to you.'
           ]
-        }),
-        author: resolves({
+        },
+        author: {
           $id: '#/properties/author',
           type: [ 'string' ],
           title: 'Author',
           default: '',
           description: 'The name of the developer or company that authored the application.'
-        }),
-        contactEmail: resolves({
+        },
+        contactEmail: {
           $id: '#/properties/contactEmail',
           type: [ 'string' ],
           title: 'Contact Email',
           description: 'The name of the developer or company that authored the application.',
           default: ''
-        }),
-        category: resolves({
+        },
+        category: {
           $id: '#/properties/category',
           type: [
             'string',
@@ -90,8 +88,8 @@ module.exports = {
             'EDUCATION_AND_REFERENCE'
           ],
           default: ''
-        }),
-        keywords: resolves({
+        },
+        keywords: {
           type: [
             'array'
           ],
@@ -109,8 +107,8 @@ module.exports = {
               'fun'
             ]
           }
-        }),
-        termsOfUseUrl: resolves({
+        },
+        termsOfUseUrl: {
           type: [
             'string'
           ],
@@ -120,8 +118,8 @@ module.exports = {
           examples: [
             'https://website.for.application/tos.html'
           ]
-        }),
-        privacyPolicyUrl: resolves({
+        },
+        privacyPolicyUrl: {
           type: [
             'string'
           ],
@@ -131,8 +129,8 @@ module.exports = {
           examples: [
             'https://website.for.application/privacy.html'
           ]
-        }),
-        testingInstructions: resolves({
+        },
+        testingInstructions: {
           $id: '#/properties/testingInstructions',
           type: [ 'string' ],
           title: 'Testing Instructions',
@@ -141,9 +139,9 @@ module.exports = {
             'Say Hello'
           ],
           default: ''
-        }),
+        },
       }
-    })),
+    },
     targetPlatforms: {
       $id: '#/properties/targetPlatforms',
       type: 'array',
@@ -158,7 +156,7 @@ module.exports = {
       },
       default: []
     },
-    targetLocales: resolves({
+    targetLocales: {
       $id: '#/properties/targetLocales',
       type: [ 'array' ],
       items: {
@@ -176,8 +174,8 @@ module.exports = {
         ]
       },
       default: []
-    }),
-    distributionCountries: resolves({
+    },
+    distributionCountries: {
       $id: '#/properties/distributionCountries',
       type: [ 'array' ],
       items: {
@@ -195,8 +193,8 @@ module.exports = {
         ]
       },
       default: []
-    }),
-    smallIconUrl: resolves({
+    },
+    smallIconUrl: {
       $id: '#/properties/smallIconUrl',
       type: [
         'string'
@@ -207,8 +205,8 @@ module.exports = {
         'https://storage.example/smallIcon.png'
       ],
       default: ''
-    }),
-    largeIconUrl: resolves({
+    },
+    largeIconUrl: {
       $id: '#/properties/largeIconUrl',
       type: [
         'string'
@@ -219,8 +217,8 @@ module.exports = {
         'https://storage.example/largeIcon.png'
       ],
       default: ''
-    }),
-    bannerUrl: resolves({
+    },
+    bannerUrl: {
       $id: '#/properties/bannerUrl',
       type: [ 'string' ],
       title: 'Banner URL',
@@ -229,15 +227,15 @@ module.exports = {
         'https://storage.example/banner.png'
       ],
       default: ''
-    }),
-    isPrivate: resolves({
+    },
+    isPrivate: {
       $id: '#/properties/isPrivate',
       type: [ 'boolean' ],
       title: 'Is Private',
       description: 'Indicates if an application should only be available to the developer.',
       default: true
-    }),
-    allowsPurchases: resolves({
+    },
+    allowsPurchases: {
       $id: '#/properties/allowsPurchases',
       type: [
         'boolean',
@@ -245,8 +243,8 @@ module.exports = {
       title: 'Allows Purchases',
       description: 'Indicates if a related applications need permission to make in-app purchases.',
       default: false
-    }),
-    usesPersonalInfo: resolves({
+    },
+    usesPersonalInfo: {
       $id: '#/properties/usesPersonalInfo',
       type: [
         'boolean'
@@ -254,8 +252,8 @@ module.exports = {
       title: 'Uses Personal Info',
       description: 'Indicates if related applications need permission to access a user\'s personal info.',
       default: false
-    }),
-    isChildDirected: resolves({
+    },
+    isChildDirected: {
       $id: '#/properties/isChildDirected',
       type: [
         'boolean',
@@ -263,8 +261,8 @@ module.exports = {
       title: 'Is Child Directed',
       description: 'Indicates if an application is directed towards children.',
       default: false
-    }),
-    isExportCompliant: resolves({
+    },
+    isExportCompliant: {
       $id: '#/properties/isExportCompliant',
       type: [
         'boolean'
@@ -272,8 +270,8 @@ module.exports = {
       title: 'Is Export Compliant',
       description: 'Indicates if an application can be exported to any region.',
       default: false
-    }),
-    containsAds: resolves({
+    },
+    containsAds: {
       $id: '#/properties/containsAds',
       type: [
         'boolean'
@@ -281,8 +279,8 @@ module.exports = {
       title: 'Contains Ads',
       description: 'Indicates if the application contains ads.',
       default: false
-    }),
-    sourceDir: resolves({
+    },
+    sourceDir: {
       $id: '#/properties/sourceDir',
       type: [
         'string',
@@ -292,8 +290,8 @@ module.exports = {
       examples: [
         '.'
       ]
-    }),
-    outputDir: resolves({
+    },
+    outputDir: {
       $id: '#/properties/outputDir',
       type: [
         'string'
@@ -304,8 +302,8 @@ module.exports = {
       examples: [
         './dist'
       ]
-    }),
-    apis: makeDefault(resolves({
+    },
+    apis: {
       $id: '#/properties/apis',
       type: [
         'object'
@@ -338,28 +336,30 @@ module.exports = {
         music: {
           $ref: '#/definitions/api',
           title: 'Music',
-          type: 'object',
           description: 'An API definition for an application that integrates with a platform\'s music API.'
         },
         video: {
           $ref: '#/definitions/api',
           title: 'Video',
-          type: 'object',
           description: 'An API definition for an application that integrates with a platform\'s video API.'
         }
       }
-    })),
-    languageModel: resolves(require('./language-model'))
+    },
+    languageModel: (function(){
+      const modelSchema = require('./language-model');
+      modelSchema.description += '  This property is optional and can be used instead of a `bisque-manifest` file.  If a `bisque-manifest` file is present, that will always be used instead.';
+      return modelSchema;
+    })()
   },
   definitions: {
-    api: makeDefault(resolves({
+    api: {
       type: [
         'object'
       ],
       title: 'API',
       description: 'Defines a standard API for platforms to access the application.',
       properties: {
-        uri: resolves({
+        uri: {
           type: [
             'string'
           ],
@@ -369,15 +369,15 @@ module.exports = {
             'https://application.example/myApp'
           ],
           default: ''
-        }),
-        httpHeaders: resolves({
+        },
+        httpHeaders: {
           type: [
             'object'
           ],
           title: 'HTTP Headers',
           description: 'Headers for the platform to use in HTTP requests to the application.'
-        }),
-        sslCertificateType: resolves({
+        },
+        sslCertificateType: {
           type: [
             'string',
           ],
@@ -390,8 +390,8 @@ module.exports = {
             'Wildcard'
           ],
           default: 'Wildcard'
-        }),
-        regions: resolves({
+        },
+        regions: {
           $id: '#/properties/application/properties/regions',
           type: [
             'array'
@@ -404,15 +404,15 @@ module.exports = {
               'US'
             ]
           }
-        }),
-        apiVersion: resolves({
+        },
+        apiVersion: {
           $id: '#/properties/application/properties/apiVersion',
           type: [
             'string'
           ],
           title: 'The version of the API protocol that the application will respond to.'
-        }),
-        locales: resolves({
+        },
+        locales: {
           type: [
             'array'
           ],
@@ -425,8 +425,8 @@ module.exports = {
               'de-DE'
             ]
           }
-        }),
-        contentType: resolves({
+        },
+        contentType: {
           $id: '#/properties/application/properties/contentType',
           type: [
             'string'
@@ -436,8 +436,8 @@ module.exports = {
           examples: [
             'application/json'
           ]
-        }),
-        preamble: resolves({
+        },
+        preamble: {
           $id: '#/properties/application/properties/preamble',
           type: [
             'string'
@@ -447,8 +447,8 @@ module.exports = {
           examples: [
             'Welcome to my flash briefing.'
           ]
-        }),
-        updateFrequency: resolves({
+        },
+        updateFrequency: {
           $id: '#/properties/application/properties/updateFrequency',
           type: [
             'string'
@@ -468,9 +468,9 @@ module.exports = {
           examples: [
             'hourly'
           ]
-        })
+        }
       }
-    })),
+    },
     resolver: {
       $id: '#/definitions/resolver',
       type: 'object',
@@ -498,7 +498,6 @@ module.exports = {
               }
             },
             {
-              type: 'object',
               $ref: '#/definitions/resolver'
             }
           ]
@@ -506,6 +505,7 @@ module.exports = {
         byLocale: {
           $id: '#/properties/byLocale',
           title: 'By Locale',
+          type: 'object',
           description: 'Resolves a property value based on the contextual locale being targeted.  This will not resolve for objects that are not locale-specific such as the manifest.',
           patternProperties: {
             '^[a-z]{2}\-[A-Z]{2}$': {
@@ -518,7 +518,6 @@ module.exports = {
                   }
                 },
                 {
-                  type: 'object',
                   $ref: '#/definitions/resolver'
                 }
               ]
@@ -539,7 +538,6 @@ module.exports = {
                   }
                 },
                 {
-                  type: 'object',
                   $ref: '#/definitions/resolver'
                 }
               ]

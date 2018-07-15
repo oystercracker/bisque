@@ -1,12 +1,7 @@
 'use strict';
 
-const resolves    = require('../lib/schema-resolves'),
-      makeDefault = require('../lib/schema-make-default');
-
-module.exports = makeDefault({
-  type: [
-    'object'
-  ],
+module.exports = {
+  type: 'object',
   title: 'Language Model',
   description: 'Specifies a model of how users can interact with the application through utterances.',
   default: {},
@@ -16,7 +11,7 @@ module.exports = makeDefault({
       title: 'Intent',
       description: 'Defines how an intent is matched and processed.',
       properties: {
-        patterns: resolves({
+        patterns: {
           type: [
             'array'
           ],
@@ -27,7 +22,7 @@ module.exports = makeDefault({
             'i like {flavor} ice cream',
             'i like {flavor}'
           ]
-        })
+        }
       }
     },
   },
@@ -39,17 +34,17 @@ module.exports = makeDefault({
   ],
   additionalProperties: false,
   properties: {
-    invocation: resolves({
-      $id: '#/properties/languageModel/invocation',
+    invocation: {
+      $id: '#/properties/invocation',
       type: [
         'string'
       ],
       title: 'Invocation',
       description: 'The invocation phrase used by a user to activate the application.',
       default: ''
-    }),
-    sampleInvocations: resolves({
-      $id: '#/properties/languageModel/sampleInvocations',
+    },
+    sampleInvocations: {
+      $id: '#/properties/sampleInvocations',
       type: [
         'array'
       ],
@@ -57,7 +52,7 @@ module.exports = makeDefault({
       description: 'A list of sample uses of the invocation phrase.  These are mainly used for building manifest files.',
       default: [],
       items: {
-        $id: '#/properties/languageModel/sampleInvocations/items',
+        $id: '#/properties/sampleInvocations/items',
         type: 'string',
         title: 'Sample Invocation',
         description: 'An example usage of the invocation phrase.',
@@ -67,9 +62,9 @@ module.exports = makeDefault({
           'tell hello world'
         ]
       }
-    }),
-    intents: resolves({
-      $id: '#/properties/languageModel/intents',
+    },
+    intents: {
+      $id: '#/properties/intents',
       type: [
         'object'
       ],
@@ -77,28 +72,28 @@ module.exports = makeDefault({
       description: 'An object defining how intents are matched from user utterances.  Think of intents as equivalent to \'commands\' given to an application.',
       default: {},
       patternProperties: {
-        '^[A-z]*$': resolves({
+        '^[A-z]*$': {
           title: 'Intent',
           type: [
             'object'
           ],
           description: 'An intent as specified by a property name.  The name should follow PascalCase with no spaces.',
           properties: {
-            alias: resolves({
+            alias: {
               type: [
                 'string'
               ],
               title: 'Alias',
               description: 'Indicates to an application reading the manifest that it should treat the intent as if it\'s another intent.  This is useful for mapping a custom intent to platform-specific intents, unifying their behavior.  When used, the alias-value will be used in place of the actual intent name inside built-out models.'
-            }),
-            mapToRequestType: resolves({
+            },
+            mapToRequestType: {
               type: [
                 'string'
               ],
               title: 'Map To Request Type',
               description: 'Indicates to an application reading the manifest that a request type should be treated as the intent.  Currently, this concept only works with Alexa.'
-            }),
-            patterns: resolves({
+            },
+            patterns: {
               type: [
                 'array'
               ],
@@ -115,15 +110,15 @@ module.exports = makeDefault({
                   'i don\'t like ice cream'
                 ]
               }
-            }),
-            slots: resolves({
+            },
+            slots: {
               type: [
                 'object'
               ],
               title: 'Slots',
               description: 'An object defining the slots to be matched from user utterances.  Slots are essentially the \'arguments\' or \'parameters\' to an intent that are captured from what a user says.',
               patternProperties: {
-                '^[a-z]*$': resolves({
+                '^[a-z]*$': {
                   title: 'Slot',
                   type: [
                     'object'
@@ -133,14 +128,14 @@ module.exports = makeDefault({
                     'type'
                   ],
                   properties: {
-                    type: resolves({
+                    type: {
                       title: 'Type of Slot',
                       type: [
                         'string'
                       ],
                       description: 'The Slot Type that the slot should be mapped to.'
-                    }),
-                    patterns: resolves({
+                    },
+                    patterns: {
                       type: [
                         'array'
                       ],
@@ -155,17 +150,17 @@ module.exports = makeDefault({
                           'is {number} even or odd'
                         ]
                       }
-                    })
+                    }
                   }
-                })
+                }
               }
-            })
+            }
           }
-        })
+        }
       }
-    }),
-    slotTypes: resolves({
-      $id: '#/properties/languageModel/slotTypes',
+    },
+    slotTypes: {
+      $id: '#/properties/slotTypes',
       title: 'Slot Types',
       description: 'Defines custom slot types and their matching values.',
       type: [
@@ -174,12 +169,12 @@ module.exports = makeDefault({
       default: {},
       patternProperties: {
         '^[A-z]*$': {
-          $id: '#/properties/languageModel/slotTypes/slotType',
+          $id: '#/properties/slotTypes/slotType',
           type: 'object',
           title: 'Slot Type',
           description: 'Defines a custom slot type.',
           properties: {
-            values: resolves({
+            values: {
               type: [
                 'array'
               ],
@@ -201,20 +196,7 @@ module.exports = makeDefault({
                     title: 'Slot Type Value Name'
                   },
                   synonyms: {
-                    type: [
-                      'array',
-                      'object'
-                    ],
-                    anyOf: [
-                      {
-                        $ref: '#/definitions/resolver'
-                      },
-                      {
-                        type: [
-                          'array'
-                        ]
-                      }
-                    ],
+                    type: 'array',
                     title: 'Slot Type Value Synonym',
                     items: {
                       type: 'string',
@@ -228,11 +210,11 @@ module.exports = makeDefault({
                   }
                 }
               }
-            })
+            }
           }
         }
       }
-    })
+    }
   }
-});
+};
 
