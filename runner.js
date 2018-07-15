@@ -1,6 +1,6 @@
 'use strict';
 
-const model       = require('./test/mock/models/model'),
+const model       = require('./test/mock/models/manifest'),
     { build }     = require('./index'),
     { stringify } = JSON;
 

@@ -13,6 +13,10 @@
     "mocha": "^5.2.0"
   },
   "dependencies": {
-    "keypather": "^3.0.0"
+    "ajv": "^6.5.2",
+    "json-schema-defaults": "^0.4.0",
+    "keypather": "^3.0.0",
+    "minimist": "^1.2.0",
+    "recast": "^0.15.2"
   }
 }

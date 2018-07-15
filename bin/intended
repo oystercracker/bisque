@@ -1,0 +1,134 @@
+#!/usr/bin/env node
+
+'use strict';
+
+function help(){
+  const packageJSON = require('../package.json');
+  console.log(`
+    Usage:  intended COMMAND
+    Build models for multi-platform, multi-locale language models.
+    Commands:
+      init               Create a new manifest file w/ language model.
+      validate           Validates the manifest file.
+      build              Build out platform-specific models and manifests.
+      generate           Generate an element of the language model.
+      help               Shows help text.
+    Version: ${packageJSON.version}
+  `);
+}
+
+function init(){
+  const defaults = require('json-schema-defaults'),
+        manifest = require(`../schemas/manifest`),
+        output   = defaults(manifest);
+  console.log(output);
+}
+
+function silentValidate(){
+  const { validateManifest } = require('../index'),
+          manifest           = require(`${process.cwd()}/manifest.js`),
+          errors             = validateManifest(manifest);
+  if(errors) return errors;
+}
+
+function validate(){
+  const errors = silentValidate();
+  if(errors) return console.error(errors.join('\n'));
+  console.log('Manifest file is valid.');
+}
+
+function generate(args){
+  const recast         = require('recast'),
+      { readFileSync } = require('fs'),
+        source         = readFileSync(`${process.cwd()}/language-model.js`, 'utf8'),
+        ast            = recast.parse(source);
+  debugger
+}
+
+function build(){
+  const errors = silentValidate();
+  if(errors) {
+    console.error(errors.join('\n'));
+    throw new Error('Manifest failed to validate before building.');
+  }
+  const { build }        = require('../index'),
+          manifest       = require(`${process.cwd()}/manifest.js`),
+          buildOut       = build(manifest),
+        { entries }      = Object,
+        { stringify }    = JSON,
+        { writeFileSync,
+          mkdirSync,
+          existsSync,
+          readdirSync,
+          lstatSync,
+          unlinkSync,
+          rmdirSync }    = require('fs'),
+          outputDir      = `${process.cwd()}/${manifest.outputDir || 'dist'}`;
+
+  function rmrf(path) {
+    if(!existsSync(path)) return;
+    readdirSync(path).forEach(file => {
+      const curPath = path + '/' + file;
+      if(lstatSync(curPath).isDirectory()) return rmrf(curPath);
+      unlinkSync(curPath);
+    });
+    rmdirSync(path);
+  }
+
+  rmrf(`${outputDir}/`);
+
+  if(!existsSync(outputDir)) mkdirSync(outputDir);
+
+  mkdirSync(`${outputDir}/alexa`);
+  mkdirSync(`${outputDir}/alexa/models`);
+
+  entries(buildOut.alexa.models).forEach(([locale, model]) => {
+    writeFileSync(`${outputDir}/alexa/models/${locale}.json`, stringify(model, null, 2), 'utf8');
+    // mkdirSync(`${outputDir}/alexa/speechAssets`);
+    // mkdirSync(`${outputDir}/alexa/speechAssets/${locale}`);
+    // const intentSchema = {
+    //   intents: model.interactionModel.languageModel.intents
+    // };
+    // writeFileSync(`${outputDir}/alexa/speechAssets/${locale}/IntentSchema.json`, stringify(intentSchema, null, 2), 'utf8');
+    // const samples = [];
+    // intentSchema.intents.forEach(intent => {
+    //   (intent.samples || []).forEach(sample => {
+    //     samples.push(`${intent.name} ${sample}`);
+    //   });
+    // });
+    // writeFileSync(`${outputDir}/alexa/speechAssets/${locale}/SampleUtterances.txt`, samples.join('\n'), 'utf8');
+  });
+
+  writeFileSync(`${outputDir}/alexa/skill.json`, stringify(buildOut.alexa.manifest, null, 2), 'utf8');
+}
+
+function inspectSchema(args){
+  const schema = require(`../schemas/manifest`);
+  const keys = Array.from((args._[1] || '').match(/[\w|-|\d]+/g) || []);
+  let ctx = schema,
+      i   = 0,
+      len = keys.length;
+  while(i<len){
+    if(!ctx) return;
+    const key = keys[i],
+          obj = ctx[key];
+    i++;
+    if(!obj) return obj;
+    ctx = obj;
+  }
+  console.log(JSON.stringify(ctx, null, 2));
+}
+
+const functions = {
+        init,
+        build,
+        generate,
+        help,
+        validate,
+        inspectSchema
+      },
+      args = require('minimist')(process.argv.slice(2));
+
+if(args._[0]) return functions[args._[0]](args);
+functions.help();
+

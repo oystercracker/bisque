@@ -1,0 +1,46 @@
+{
+  "manifest": {
+    "manifestVersion": "1.0",
+    "publishingInformation": {
+      "locales": {
+        "en-US": {
+          "summary": "Hello World implemented using Saltine.",
+          "examplePhrases": [
+            "open hello world",
+            "tell hello world",
+            "ask hello world"
+          ],
+          "keywords": [],
+          "smallIconUri": "",
+          "largeIconUri": "",
+          "name": "Hello World",
+          "description": ""
+        }
+      },
+      "isAvailableWorldwide": false,
+      "testingInstructions": "",
+      "distributionCountries": [
+        "US"
+      ]
+    },
+    "apis": {
+      "custom": {
+        "endpoint": {}
+      }
+    },
+    "permissions": [],
+    "privacyAndCompliance": {
+      "usesPersonalInfo": false,
+      "isChildDirected": false,
+      "isExportCompliant": true,
+      "containsAds": false,
+      "locales": {
+        "en-US": {
+          "termsOfUseUrl": "foo",
+          "privacyPolicyUrl": "boo"
+        }
+      }
+    },
+    "events": {}
+  }
+}

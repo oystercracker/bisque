@@ -1,46 +1,20 @@
 'use strict';
 
-const config = {
-  version: '1.0',
-  targets: ['alexa'],
-  defaultLocale: 'en-US',
-  targetLocales: ['en-US', 'fr-FR', 'de-DE'],
-  description: {
-    byLocale: {
-      'en-US': {
-        name: 'Hello World',
-        shortSummary: 'Hello World implemented using Saltine.',
-        longSummary: '',
-        invocation: 'hello world',
-        exampleInvocations: [
-          'open hello world',
-          'tell hello world',
-          'ask hello world'
-        ],
-        termsOfServiceUrl: '',
-        contactEmail: '',
-        privacyUrl: '',
-        testingInstructions: '',
-        targets: {
-          alexa: {
-            category: 'EDUCATION_AND_REFERENCE'
-          }
-        }
-      }
-    }
-  },
+const languageModel = {
+  invocation: '',
+  sampleInvocations: [],
   intents: {
     Launch: {
-      targets: {
-        alexa: {
-          mapRequestType: 'LaunchRequest'
+      mapToRequestType: {
+        byPlatform: {
+          alexa: 'LaunchRequest'
         }
       }
     },
     Stop: {
-      targets: {
-        alexa: {
-          alias: 'AMAZON.StopIntent'
+      alias: {
+        byPlatform: {
+          alexa: 'AMAZON.StopIntent'
         }
       },
       patterns: {
@@ -57,9 +31,9 @@ const config = {
       }
     },
     Cancel: {
-      targets: {
-        alexa: {
-          alias: 'AMAZON.CancelIntent'
+      alias: {
+        byPlatform: {
+          alexa: 'AMAZON.CancelIntent'
         }
       },
       patterns: {
@@ -82,9 +56,9 @@ const config = {
       }
     },
     Help: {
-      targets: {
-        alexa: {
-          alias: 'AMAZON.HelpIntent'
+      alias: {
+        byPlatform: {
+          alexa: 'AMAZON.HelpIntent'
         }
       },
       patterns: {
@@ -109,30 +83,30 @@ const config = {
       },
       slots: {
         numbah: {
-          required: true,
-          patterns: ['love me some {numbah:Number}']
+          type: {
+            default: 'FooBar',
+            byLocale: {
+              'en-US': 'Number'
+            }
+          },
+          patterns: {
+            byLocale: {
+              'en-US': ['love me some {numbah}']
+            }
+          }
         }
       }
     },
     Fallback: {
-      targets: {
-        alexa: {
-          alias: 'AMAZON.FallbackIntent'
+      alias: {
+        byPlatform: {
+          alexa: 'AMAZON.FallbackIntent'
         }
       }
     }
   },
   slotTypes: {
     Number: {
-      target: {
-        alexa: {
-          alias: {
-            byLocale: {
-              'en-US': 'AMAZON.NUMBER'
-            }
-          }
-        }
-      },
       values: [
         {
           name: '1',
@@ -146,5 +120,5 @@ const config = {
   }
 };
 
-module.exports = config;
+module.exports = languageModel;
 

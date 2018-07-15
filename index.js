@@ -1,36 +1,46 @@
 'use strict';
 
-const builders   = {
-        alexa(){
-          return buildForAlexa(...arguments);
+const builders = {
+        alexa(manifest){
+          const modelsByLocale = {};
+          manifest.targetLocales.forEach(locale => modelsByLocale[locale] = buildAlexaModel(manifest, locale));
+          const alexaManifest = buildAlexaManifest(manifest);
+          return {
+            manifest: alexaManifest,
+            models: modelsByLocale
+          }
         }
       },
     { entries,
-      assign }   = Object,
-      BaseObject = require('./lib/base-object');
+      assign,
+      keys }         = Object,
+      ConfigResolver = require('./lib/config-resolver');
 
-function build(model, targetLocale='en-US'){
-  const errors = validateModel(model);
+function build(manifest){
+  const errors = validateManifest(manifest),
+        output = {};
   if(errors) throw new Error(errors[0]);
-  return model.targets.map(target => builders[target](model));
+  manifest.targetPlatforms.forEach(target => output[target] = builders[target](manifest));
+  return output;
 }
 
-function validateModel(model){
-  const errors = [];
-  if(!model) errors.push('Expected an interaction model but none provided.');
-  if(!model.targets || !model.targets.length) errors.push('Provided model has no targets.');
-  if(!model.targetLocales || !model.targetLocales.length) errors.push('Model should have at least one target locale.');
-  if(!model.description) errors.push('Description property was expected but not found.');
+function validateManifest(manifest){
+  const AJV       = require('ajv'),
+        validator = new AJV(),
+        schema    = require('./schemas/manifest'),
+        errors    = [];
+  if(!manifest) errors.push('Expected a manifest but none provided.');
+  if(!manifest.targetPlatforms || !manifest.targetPlatforms.length) errors.push('Provided manifest has no platform targets.');
+  if(!manifest.targetLocales   || !manifest.targetLocales.length)   errors.push('Manifest should have at least one target locale.');
+  if(!manifest.description)           errors.push('Description property was expected but not found.');
+  if(!manifest.languageModel)         errors.push('Manifest is missing languageModel.');
+  if(!manifest.languageModel.intents) errors.push('Language model is missing intents property.');
+  validator.validate(schema, manifest);
+  (validator.errors || []).forEach(err => errors.push(`${err.dataPath} ${err.message}`));
   if(errors.length) return errors;
 }
 
-function buildForAlexa(model){
-  const modelsByLocale = {};
-  model.targetLocales.forEach(locale => modelsByLocale[locale] = buildAlexaModel(model, locale));
-  return modelsByLocale;
-}
-
-function buildAlexaModel(model, locale){
+function buildAlexaModel(manifest, locale){
   const outputModel = {
           interactionModel: {
             languageModel: {
@@ -40,88 +50,130 @@ function buildAlexaModel(model, locale){
             }
           }
         },
-        description     = (model.description.byLocale ? model.description.byLocale[locale] : model.description) || model.description,
+        description     = (manifest.description.byLocale ? manifest.description.byLocale[locale] : manifest.description) || manifest.description,
         requiredIntents = ['AMAZON.CancelIntent', 'AMAZON.StopIntent', 'AMAZON.HelpIntent', 'AMAZON.FallbackIntent'];
   outputModel.interactionModel.languageModel.invocationName = description.invocation;
+  const languageModel = manifest.languageModel;
   // INTENTS
-  entries(model.intents || {}).forEach(([name, config]) => {
-    const intentConfig = BaseObject.create(config),
+  entries(languageModel.intents || {})  .forEach(([name, config]) => {
+    const intentConfig = ConfigResolver.create(config),
           outputIntent = {
             name,
-            samples: []
+            samples: [],
+            slots: []
           },
-          alias = intentConfig.get('targets.alexa.alias');
-    if(intentConfig.get('targets.alexa.mapRequestType')) return;
+          alias = intentConfig.fetch('alexa', locale, 'alias');
+    // If an intent name is matched to a request-type for the target(in this case alexa), then
+    // the intent should not be added to the language model.
+    if(intentConfig.fetch('alexa', locale, 'mapToRequestType')) return;
     if(alias) {
       if(requiredIntents.find(i => i === name.trim()) && requiredIntents.find(i => i === alias.trim())){
         throw new Error(`Alexa built-in intent '${name}' cannot have an alias to another built-in intent.`);
       }
       outputIntent.name = alias;
     }
-    // PATTERNS
-    const patterns = intentConfig.get(`patterns.byLocale['${locale}']`, intentConfig.get('patterns', []));
-    let outputSamples = [];
-    if(Array.isArray(patterns))       outputSamples = patterns;
-    if(patterns && patterns.byLocale) outputSamples = (patterns.byLocale || {})[locale] || [];
-    outputIntent.samples = outputSamples;
     // SLOTS
-    const inferredSlots = inferSlotsFromPatterns(outputIntent.samples),
-          explicitSlots = assign({}, intentConfig.get('slots', {}));
-    entries(explicitSlots).forEach(([eSlot, _eSlotConfig]) => {
-      // WHERE YOU LEFT OFF: reconciling byLocale versus an aray
-      const iSlotConfig = BaseObject.create(inferredSlots[eSlot] || {}),
-            eSlotConfig = BaseObject.create(_eSlotConfig, {}),
-            iPatterns   = Array.isArray(iSlotConfig.get('patterns')) ? iSlotConfig.get('patterns') : iSlotConfig.get(`patterns.byLocale['${locale}']`, []),
-            ePatterns   = Array.isArray(eSlotConfig.get('patterns')) ? eSlotConfig.get('patterns') : eSlotConfig.get(`patterns.byLocale['${locale}']`, []);
-      if(name === 'Help') debugger;
-      iSlotConfig.set('type', eSlotConfig.get('type', iSlotConfig.get('type')));
-      Array.prototype.push.apply(iPatterns, []
-                                              .concat(ePatterns)
-                                              .filter((it, i, ar) => ar.indexOf(it) === i));
+    const slots = intentConfig.fetch('alexa', locale, 'slots') || {};
+    entries(slots).forEach(([slot, _slotConfig]) => {
+      const slotConfig = ConfigResolver.create(_slotConfig),
+            type       = slotConfig.fetch('alexa', locale, 'type');
+      if(!type) throw new Error(`Slot '${slot}' of intent '${name}' has no type.`);
+      const outSlot = {
+        name: slot,
+        type: type,
+        samples: slotConfig.fetch('alexa', locale, 'patterns') || []
+      };
+      outputIntent.slots.push(outSlot);
     });
-    intentConfig.set('slots', inferredSlots);
-    entries(intentConfig.get('slots', [])).forEach(([slot, slotConfig]) => {
-      if(!slotConfig.type) throw new Error(`Slot '${slot}' of intent '${name}' has no type.`);
-      outputIntent.slots = outputIntent.slots || [];
-      outputIntent.slots.push({
-        name:    slot,
-        type:    slotConfig.type,
-        samples: slotConfig.patterns.map(s => stripImplicitTypeDeclarations(s))
+    // PATTERNS
+    const patterns = intentConfig.fetch('alexa', locale, 'patterns') || [];
+    patterns.forEach(pattern => {
+      // Basically just check to make sure that inline slot has explicit definition.
+      pattern.replace(/{\s*(\w*)\:*\w*}/g, function(x,y){
+        if(!slots[y]) throw new Error(`Slot name {${y}} in sample pattern for intent '${name}' has no slot definition. \n Pattern: "${sample}"`);
       });
     });
-    outputIntent.samples = (outputIntent.samples || []).map(s => stripImplicitTypeDeclarations(s))
+    outputIntent.samples = patterns;
     outputModel.interactionModel.languageModel.intents.push(outputIntent);
+  });
+  requiredIntents.forEach(i => {
+    const hasIntent = outputModel.interactionModel.languageModel.intents.some(int => int.name === i);
+    if(!hasIntent) throw new Error(`Language model failed to output Alexa model with required built-in intent '${i}'.`)
+  });
+  // SLOT TYPES
+  entries(languageModel.slotTypes  ).forEach(([type, _config]) => {
+    const config  = ConfigResolver.create(_config),
+          outType = {
+            name: type
+          };
+    outType.values = config.fetch('alexa', null, 'values') || [];
+    outputModel.interactionModel.languageModel.types.push(outType);
   });
   return outputModel;
 }
 
-function stripImplicitTypeDeclarations(pattern){
-  return pattern.replace(/{\s*(\w*):(\w+)}/g, (x,y) => `{${y}}`);
-}
+function buildAlexaManifest(manifest){
+  const alexaManifest = {
+    manifest: {
+      manifestVersion: '1.0',
+      publishingInformation: {},
+      apis: {},
+      permissions: [],
+      privacyAndCompliance: {},
+      events: {}
+    }
+  },
+  inputManifest  = ConfigResolver.create(manifest),
+  outputManifest = alexaManifest.manifest;
 
-function inferSlotsFromPatterns(patterns=[]){
-  const inferredSlots = {};
-  patterns.forEach(p => {
-    ((p || '').match(/{\s*([\w|\:]+)\s*}/g) || [])
-              .map(s => s.replace(/[\{|\}]/g, '').split(':'))
-              .forEach(([name, type]) => {
-                inferredSlots[name] = inferredSlots[name] || {
-                  type:     null,
-                  patterns: [],
-                  required: true
-                };
-                if(type && type !== 'undefined') inferredSlots[name].type = type;
-                // Strip out inline-type declaration
-                inferredSlots[name].patterns.push(stripImplicitTypeDeclarations(p));
-              });
+  outputManifest.publishingInformation = { locales: {} };
+  (inputManifest.fetch('alexa', null, 'targetLocales') || []).forEach(locale => {
+    const desc = inputManifest.fetch('alexa', locale, 'description') || {};
+    outputManifest.publishingInformation.locales[locale] = {
+      summary:        desc.shortSummary       || '',
+      examplePhrases: desc.exampleInvocations || [],
+      keywords:       desc.keywords           || [],
+      smallIconUri:   desc.smallIcon          || '',
+      largeIconUri:   desc.largeIcon          || '',
+      name:           desc.name               || '',
+      description:    desc.longSummary        || '',
+    };
   });
-  return inferredSlots;
-}
 
+  outputManifest.publishingInformation.isAvailableWorldwide  = inputManifest.fetch('alexa', null, 'isAvailableWorldwide');
+  outputManifest.publishingInformation.testingInstructions   = inputManifest.fetch('alexa', null, 'testingInstructions');
+  outputManifest.publishingInformation.category              = inputManifest.fetch('alexa', null, 'description.category');
+  outputManifest.publishingInformation.distributionCountries = inputManifest.fetch('alexa', null, 'distributionCountries');
+
+  outputManifest.privacyAndCompliance.allowPurchases    = inputManifest.fetch('alexa', null, 'allowPurchases');
+  outputManifest.privacyAndCompliance.usesPersonalInfo  = inputManifest.fetch('alexa', null, 'usesPersonalInfo');
+  outputManifest.privacyAndCompliance.isChildDirected   = inputManifest.fetch('alexa', null, 'isChildDirected');
+  outputManifest.privacyAndCompliance.isExportCompliant = inputManifest.fetch('alexa', null, 'isExportCompliant');
+  outputManifest.privacyAndCompliance.containsAds       = inputManifest.fetch('alexa', null, 'containsAds');
+  outputManifest.privacyAndCompliance.locales           = {};
+
+  (inputManifest.fetch('alexa', null, 'targetLocales') || []).forEach(locale => {
+    outputManifest.privacyAndCompliance.locales[locale] = {
+      termsOfUseUrl:    inputManifest.fetch('alexa', locale, 'description.termsOfUseUrl'),
+      privacyPolicyUrl: inputManifest.fetch('alexa', locale, 'description.privacyPolicyUrl')
+    };
+  });
+
+  if(inputManifest.fetch('alexa', null, 'endpoint')){
+    outputManifest.apis = { custom: { endpoint: {} } };
+    const uri = inputManifest.fetch('alexa', null, 'endpoint.uri');
+    if(uri) outputManifest.apis.custom.endpoint.uri = uri;
+    const certType = inputManifest.fetch('alexa', null, 'sslCertificateType');
+    if(certType) outputManifest.apis.custom.endpoint.sslCertificateType = certType;
+  }
+
+  return alexaManifest;
+}
 
 module.exports = {
   build,
   buildAlexaModel,
-  inferSlotsFromPatterns,
-  validateModel
-}
+  buildAlexaManifest,
+  validateManifest
+};
+
