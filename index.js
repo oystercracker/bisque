@@ -9,6 +9,10 @@ const builders = {
             manifest: alexaManifest,
             models: modelsByLocale
           }
+        },
+        dialogflow(manifest){
+          const modelsByLocale = {};
+
         }
       },
     { entries,
@@ -55,7 +59,7 @@ function buildAlexaModel(manifest, locale){
   outputModel.interactionModel.languageModel.invocationName = description.invocation;
   const languageModel = manifest.languageModel;
   // INTENTS
-  entries(languageModel.intents || {})  .forEach(([name, config]) => {
+  entries(languageModel.intents || {}).forEach(([name, config]) => {
     const intentConfig = ConfigResolver.create(config),
           outputIntent = {
             name,
@@ -170,10 +174,90 @@ function buildAlexaManifest(manifest){
   return alexaManifest;
 }
 
+
+function buildDialogflowManifest(manifest){
+  const outputManifest = {
+    description: '',
+    disableInteractionLogs: false,
+    disableStackdriverLogs: true,
+    googleAssistant: {
+      googleAssistantCompatible: true,
+      welcomeIntentSignInRequired: false,
+      startIntents: [],
+      systemIntents: [],
+      endIntentIds: [],
+      oAuthLinking: {
+        required: false,
+        grantType: "AUTH_CODE_GRANT"
+      },
+      voiceType: "MALE_1",
+      capabilities: [],
+      protocolVersion: "V2",
+      autoPreviewEnabled: true,
+      isDeviceAgent: false
+    },
+    defaultTimezone: 'America/Denver',
+    customClassifierMode: 'use.after',
+    mlMinConfidence: 0.3,
+    supportedLanguages: [],
+    onePlatformApiVersion: 'v2',
+    analyzeQueryTextSentiment: false
+  };
+
+  const inputManifest = ConfigResolver.create(manifest);
+  outputManifest.description = inputManifest.fetch('dialogflow', null, 'description.shortSummary');
+  const webhook = inputManifest.fetch('dialogflow', null, 'apis.application');
+  if(webhook){
+    outputManifest.webhook = {
+      url: webhook.uri,
+      headers: webhook.headers || {},
+      available: true,
+      useForDomains: false,
+      cloudFunctionsEnabled: false,
+      cloudFunctionsInitialized: false
+    }
+  }
+
+  const languages = (inputManifest.fetch('dialogflow', null, 'targetLocales') || []).map(l => l.replace(/[a-z]\-/, ''));
+  outputManifest.language = languages[0] || 'en';
+  outputManifest.supportedLanguages = languages;
+
+  outputManifest.isPrivate = inputManifest.fetch('dialogflow', null, 'isPrivate') || false;
+
+  return outputManifest;
+}
+
+function buildDialogflowModel(manifest, locale){
+  const model = {
+    intents: {},
+    usersays: {}
+  };
+  const languageModel = manifest.languageModel;
+  entries(languageModel.intents || {}).forEach(([name, config]) => {
+    const outputIntent = {
+      id: "4f563969-14b5-4c9a-aa19-5ed32db55aa4",
+      name,
+      auto: true,
+      contexts: [
+        "sessionAttributes"
+      ],
+      responses: [],
+      priority: 500000,
+      webhookUsed: true,
+      webhookForSlotFilling: false,
+      lastUpdate: 1531614579,
+      fallbackIntent: false,
+      events: []
+    };
+  });
+}
+
 module.exports = {
   build,
   buildAlexaModel,
   buildAlexaManifest,
+  buildDialogflowManifest,
+
   validateManifest
 };
 

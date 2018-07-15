@@ -84,19 +84,6 @@ function build(){
 
   entries(buildOut.alexa.models).forEach(([locale, model]) => {
     writeFileSync(`${outputDir}/alexa/models/${locale}.json`, stringify(model, null, 2), 'utf8');
-    // mkdirSync(`${outputDir}/alexa/speechAssets`);
-    // mkdirSync(`${outputDir}/alexa/speechAssets/${locale}`);
-    // const intentSchema = {
-    //   intents: model.interactionModel.languageModel.intents
-    // };
-    // writeFileSync(`${outputDir}/alexa/speechAssets/${locale}/IntentSchema.json`, stringify(intentSchema, null, 2), 'utf8');
-    // const samples = [];
-    // intentSchema.intents.forEach(intent => {
-    //   (intent.samples || []).forEach(sample => {
-    //     samples.push(`${intent.name} ${sample}`);
-    //   });
-    // });
-    // writeFileSync(`${outputDir}/alexa/speechAssets/${locale}/SampleUtterances.txt`, samples.join('\n'), 'utf8');
   });
 
   writeFileSync(`${outputDir}/alexa/skill.json`, stringify(buildOut.alexa.manifest, null, 2), 'utf8');

@@ -230,15 +230,12 @@ module.exports = {
       ],
       default: ''
     }),
-    isAvailableWorldwide: resolves({
-      $id: '#/properties/isAvailableWorldwide',
+    isPrivate: resolves({
+      $id: '#/properties/isPrivate',
       type: [ 'boolean' ],
-      title: 'Is Available Worldwide',
-      description: 'Indicates if an application should be made available worldwide by platforms.',
-      'default': false,
-      examples: [
-        false
-      ],
+      title: 'Is Private',
+      description: 'Indicates if an application should only be available to the developer.',
+      default: true
     }),
     allowsPurchases: resolves({
       $id: '#/properties/allowsPurchases',
@@ -247,10 +244,7 @@ module.exports = {
       ],
       title: 'Allows Purchases',
       description: 'Indicates if a related applications need permission to make in-app purchases.',
-      'default': false,
-      examples: [
-        false
-      ]
+      default: false
     }),
     usesPersonalInfo: resolves({
       $id: '#/properties/usesPersonalInfo',
@@ -259,10 +253,7 @@ module.exports = {
       ],
       title: 'Uses Personal Info',
       description: 'Indicates if related applications need permission to access a user\'s personal info.',
-      'default': false,
-      examples: [
-        false
-      ]
+      default: false
     }),
     isChildDirected: resolves({
       $id: '#/properties/isChildDirected',
@@ -271,10 +262,7 @@ module.exports = {
       ],
       title: 'Is Child Directed',
       description: 'Indicates if an application is directed towards children.',
-      'default': false,
-      examples: [
-        false
-      ]
+      default: false
     }),
     isExportCompliant: resolves({
       $id: '#/properties/isExportCompliant',
@@ -283,10 +271,7 @@ module.exports = {
       ],
       title: 'Is Export Compliant',
       description: 'Indicates if an application can be exported to any region.',
-      'default': false,
-      examples: [
-        true
-      ]
+      default: false
     }),
     containsAds: resolves({
       $id: '#/properties/containsAds',
@@ -295,10 +280,7 @@ module.exports = {
       ],
       title: 'Contains Ads',
       description: 'Indicates if the application contains ads.',
-      'default': false,
-      examples: [
-        false
-      ]
+      default: false
     }),
     sourceDir: resolves({
       $id: '#/properties/sourceDir',
