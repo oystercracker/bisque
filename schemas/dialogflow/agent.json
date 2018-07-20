@@ -54,7 +54,7 @@
         "startIntents": {
           "$id": "/properties/googleAssistant/properties/startIntents",
           "type": "array",
-          "default": ["Launch"]
+          "default": []
         },
         "systemIntents": {
           "$id": "/properties/googleAssistant/properties/systemIntents",

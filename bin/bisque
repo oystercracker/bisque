@@ -152,6 +152,7 @@ function build(){
       if(!existsSync(base)) mkdirSync(base);
       entries(files).forEach(([_path, file]) => {
         const path = [base, _path].join('/');
+        if(_path.match(/FooBar_entries_en-us.json/)) debugger;
         if(isPlainObject(file) && !_path.match(/\.json$/)) return writeToFS(file, path);
         writeFileSync(path, stringify(file, null, 2), 'utf8');
       });

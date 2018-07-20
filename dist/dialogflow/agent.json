@@ -6,9 +6,7 @@
   "googleAssistant": {
     "googleAssistantCompatible": false,
     "welcomeIntentSignInRequired": false,
-    "startIntents": [
-      "Launch"
-    ],
+    "startIntents": [],
     "systemIntents": [],
     "endIntentIds": [],
     "oAuthLinking": {
@@ -33,7 +31,8 @@
   "customClassifierMode": "use.after",
   "mlMinConfidence": 0.3,
   "supportedLanguages": [
-    "en-US"
+    "en",
+    "en-us"
   ],
   "onePlatformApiVersion": "v2",
   "analyzeQueryTextSentiment": false

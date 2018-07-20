@@ -21,12 +21,19 @@ const { entries,
           },
           dialogflow(manifest, languageModels){
             const { buildManifest, 
-                    buildIntents }      = require('./lib/platforms/dialogflow'),
-                    dialogflowManifest  = buildManifest(manifest),
-                    intents             = buildIntents(manifest, languageModels);
+                    buildIntents,
+                    buildEntities }    = require('./lib/platforms/dialogflow'),
+                    dialogflowManifest = buildManifest(manifest),
+                    languages          = dialogflowManifest.languages,
+                    intents            = buildIntents(manifest, languageModels),
+                    entities           = buildEntities(manifest, languageModels);
             return {
               'agent.json': dialogflowManifest,
-              intents
+              intents,
+              entities,
+              'package.json': {
+                version: '1.0.0'
+              }
             };
           }
         };
