@@ -1,5 +1,5 @@
 {
-  "name": "intended",
+  "name": "bisque",
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
@@ -13,10 +13,21 @@
     "mocha": "^5.2.0"
   },
   "dependencies": {
+    "aguid": "^2.0.0",
     "ajv": "^6.5.2",
-    "json-schema-defaults": "^0.4.0",
+    "astley": "^1.1.0",
+    "cheerio": "^1.0.0-rc.2",
+    "esquery": "^1.0.1",
+    "javascript-stringify": "^1.6.0",
+    "json-schema-defaults": "chrisdostert/json-schema-defaults#265263bdbe76cf905d186426f44e89e16d4abd86",
+    "jsonpath": "^1.0.0",
     "keypather": "^3.0.0",
     "minimist": "^1.2.0",
-    "recast": "^0.15.2"
+    "query-ast": "^1.0.1",
+    "recast": "^0.15.2",
+    "simple-object-query": "^1.6.1",
+    "to-ast": "^1.0.0",
+    "xml-js": "^1.6.7",
+    "xmlbuilder": "^10.0.0"
   }
 }

@@ -1,0 +1,56 @@
+{
+  "interactionModel": {
+    "languageModel": {
+      "intents": [
+        {
+          "name": "Launch",
+          "samples": [],
+          "slots": [
+            {
+              "name": "foo",
+              "type": "FooBar",
+              "samples": [
+                "i like {foo} and {bar:Wocka}",
+                "{foo:FooBar} is great"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Cancel",
+          "samples": [],
+          "slots": []
+        },
+        {
+          "name": "Stop",
+          "samples": [],
+          "slots": []
+        },
+        {
+          "name": "Help",
+          "samples": [],
+          "slots": [
+            {
+              "name": "foo",
+              "type": "FooBar",
+              "samples": [
+                "this is {foo}"
+              ]
+            }
+          ]
+        },
+        {
+          "name": "Fallback",
+          "samples": [],
+          "slots": []
+        }
+      ],
+      "types": [
+        {
+          "name": "FooBar",
+          "values": []
+        }
+      ]
+    }
+  }
+}

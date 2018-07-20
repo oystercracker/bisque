@@ -1,0 +1,197 @@
+#!/usr/bin/env node
+
+'use strict';
+
+const { entries }      = Object,
+      { stringify }    = JSON,
+      { writeFileSync,
+        mkdirSync,
+        existsSync,
+        readFileSync } = require('fs'),
+        Astley         = require('astley'),
+      { rmrf,
+        isPlainObject } = require('../lib/utils');
+
+function help(){
+  const packageJSON = require('../package.json');
+  console.log(`
+    Usage:  bisque COMMAND
+    Build models for multi-platform, multi-locale language models.
+    Commands:
+      init               Create a new manifest file w/ language model.
+      validate           Validates the manifest and language model.
+      build              Build out platform-specific models and manifests.
+      generate           Generate an element of the language model.
+      help               Shows help text.
+    Version: ${packageJSON.version}
+  `);
+}
+
+// function applyAlexaMapping(){
+//   const manifest = readFileSync(`${process.cwd()}/bisque-model.js`, 'utf8'),
+//         astley   = Astley.from(manifest),
+//         node = astley.search(n => n.parent.key.name == 'intents' && n.type == 'ObjectExpression')[0],
+//         intentMap = {
+//           Stop: 'AMAZON.StopIntent',
+//           Cancel: 'AMAZON.CancelIntent',
+//           Help: 'AMAZON.HelpIntent',
+//           Fallback: 'AMAZON.FallbackIntent'
+//         },
+//         basicIntents = Object.keys(intentMap);
+//   if(!node) return;
+//   node.properties.forEach(p => {
+//     if(!p.value || p.value.type !== 'ObjectExpression') return;
+//     if(!basicIntents.find(i => i === p.key.name)) return;
+//     if(!p.value.properties.some(p => p.key.name === 'alias')){
+//       const n = new Astley(p.value);
+//       n.prop('alias', '');
+//     }
+//     const aliasProp = p.value.properties.find(p => p.key.name === 'alias');
+//     if(!aliasProp) return;
+//     debugger
+//   });
+// }
+
+/**
+ * Initializes a new set of Bisuqe manifest and model files.
+ */
+async function init({ y: skipQuestions, a: appName, platforms= '', locales='' }){
+  const defaults       = require('json-schema-defaults'),
+        manifestSchema = require(`../schemas/manifest`),
+        modelSchema    = require(`../schemas/language-model`),
+        toJS           = require('javascript-stringify'),
+        model          = toJS(defaults(modelSchema), null, 2),
+        ReadPromise    = require('../lib/read-promise'),
+        rp = new ReadPromise({ skipQuestions });
+  if(!existsSync('bisque-manifest.js')){
+    const manifest = defaults(manifestSchema);
+    if(!appName) appName = await rp.question('What will your application be called? (defaults to name in package.json)  ') || '';
+    if((!appName || !appName.length) && existsSync(`${process.cwd()}/package.json`)){
+      const pkg = require(`${process.cwd()}/package.json`);
+      if(pkg.name) appName = pkg.name;
+    }
+    manifest.description.name = appName;
+    if(!platforms) platforms = await rp.question('Which platforms are you targeting? (e.g. alexa, dialogflow, google)  ') || '';
+    manifest.targetPlatforms = platforms.split(/[\s|\,]/g).filter(p => p && p.length);
+    manifest.targetLocales   = locales.split(/[\s|\,]/g).filter(p => p && p.length);
+    const manifestJS = toJS(manifest, null, 2);
+    writeFileSync('bisque-manifest.js', `module.exports = ${manifestJS};`, 'utf8');
+  } else {
+    console.log('bisque-manifest.js already exists');
+  }
+  if(!existsSync('bisque-model.js')){
+    writeFileSync('bisque-model.js', `module.exports = ${model};`, 'utf8');
+  } else {
+    console.log('bisque-model.js already exists');
+  }
+  rp.close();
+}
+/**
+ * Find manifest and language model from files.
+ * Will default to language model to the object under the `languageModel` property
+ * in the manifest if it exists.
+ */
+function loadAssets(){
+  const CURRENT_DIRECTORY = process.cwd();
+  let manifest, languageModel;
+  try {
+    // This isn't a case where we want to cache the object.
+    delete require.cache[require.resolve(`${CURRENT_DIRECTORY}/bisque-manifest`)]
+    manifest = require(`${CURRENT_DIRECTORY}/bisque-manifest`);
+  } catch (e) {
+    if(e && e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') throw e;
+  }
+  try {
+    delete require.cache[require.resolve(`${CURRENT_DIRECTORY}/bisque-model`)]
+    languageModel = require(`${CURRENT_DIRECTORY}/bisque-model`);
+  } catch (e) {
+    if(e && e.code !== 'MODULE_NOT_FOUND' && e.code !== 'ENOENT') throw e;
+  }
+  languageModel = languageModel || (manifest || {}).languageModel;
+  return { manifest, languageModel };
+}
+/**
+ * Expand out versions of the manifest and language model
+ * based on targeted platforms and locales.
+ */
+function expand(){
+  const { expandAssets } = require('../index'),
+        { manifest,
+          languageModel } = loadAssets(),
+          errors          = [];
+  if(!manifest)      errors.push('Manifest file is expected but not found.');
+  if(!languageModel) errors.push('Language model file is expected but not found.');
+  if(errors.length) return { errors };
+  return expandAssets(manifest, languageModel);
+}
+
+async function validate(){
+  const { errors } = expand();
+  if(errors) return console.error(errors.join('\n'));
+  console.log('Manifest and language model are valid.');
+}
+
+function generate(args){
+  // const recast         = require('recast'),
+  //     { readFileSync } = require('fs'),
+  //       source         = readFileSync(`${process.cwd()}/bisque-model.js`, 'utf8'),
+  //       ast            = recast.parse(source);
+}
+
+function build(){
+  const { build } = require('../index'),
+        { errors, assets } = expand();
+  if(errors) return console.error(errors.join('\n'));
+  // const outputDir = `${process.cwd()}/${assets.manifest.outputDir || 'dist'}`;
+  const outputDir = `${process.cwd()}/dist`;
+  rmrf(`${outputDir}/`);
+  if(!existsSync(outputDir)) mkdirSync(outputDir);
+  entries(assets).forEach(([platform, assets]) => {
+    const files = build(platform, assets);
+    function writeToFS(files, base=''){
+      if(!existsSync(base)) mkdirSync(base);
+      entries(files).forEach(([_path, file]) => {
+        const path = [base, _path].join('/');
+        if(isPlainObject(file) && !_path.match(/\.json$/)) return writeToFS(file, path);
+        writeFileSync(path, stringify(file, null, 2), 'utf8');
+      });
+    }
+    const basePath = `${outputDir}/${platform}/`;
+    if(!existsSync(basePath)) mkdirSync(basePath);
+    writeToFS(files, basePath);
+  });
+}
+
+function inspectSchema(args){
+  const schema = require(`../schemas/manifest`);
+  const keys = Array.from((args._[1] || '').match(/[\w|-|\d]+/g) || []);
+  let ctx = schema,
+      i   = 0,
+      len = keys.length;
+  while(i<len){
+    if(!ctx) return;
+    const key = keys[i],
+          obj = ctx[key];
+    i++;
+    if(!obj) return obj;
+    ctx = obj;
+  }
+  console.log(stringify(ctx, null, 2));
+}
+
+const functions = {
+        init,
+        build,
+        generate,
+        help,
+        validate,
+        inspectSchema
+      },
+      args = require('minimist')(process.argv.slice(2)),
+      isBeingRequired = module.parent;
+
+if(isBeingRequired) return module.exports = functions;
+
+if(args._[0] && functions[args._[0]]) return functions[args._[0]](args);
+functions.help();
+

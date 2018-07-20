@@ -1,0 +1,35 @@
+{
+  "id": "cae7d57b-067a-44b8-84c9-89631a95c7dc",
+  "name": "Stop",
+  "auto": true,
+  "contexts": [],
+  "responses": [
+    {
+      "resetContexts": false,
+      "affectedContexts": [
+        {
+          "lifespan": 5
+        }
+      ],
+      "parameters": [],
+      "messages": [
+        {
+          "type": 0,
+          "lang": "en",
+          "speech": []
+        }
+      ],
+      "defaultResponsePlatforms": {
+        "google": false
+      },
+      "speech": []
+    }
+  ],
+  "priority": 500000,
+  "webhookUsed": true,
+  "webhookForSlotFilling": false,
+  "lastUpdate": 0,
+  "fallbackIntent": false,
+  "events": [],
+  "lastUpdated": 1532100086
+}

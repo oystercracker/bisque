@@ -1,0 +1,245 @@
+{
+  "type": "object",
+  "definitions": {},
+  "$schema": "http://json-schema.org/draft-07/schema#",
+  "title": "Dialogflow Agent",
+  "description": "https://dialogflow.com/docs/reference/agent-json-fields",
+  "properties": {
+    "description": {
+      "$id": "/properties/description",
+      "type": "string",
+      "title": "Description",
+      "description": "Optional agent description for the Agent demo page.",
+      "default": ""
+    },
+    "language": {
+      "$id": "/properties/language",
+      "type": "string",
+      "title": "The agent's language.  See: https://dialogflow.com/docs/languages",
+      "default": "en",
+      "examples": [
+        "en"
+      ]
+    },
+    "disableInteractionLogs": {
+      "$id": "/properties/disableInteractionLogs",
+      "type": "boolean",
+      "title": "Disable Interaction Logs",
+      "description": "true if interaction logging is disabled, false if enabled.  See: https://dialogflow.com/docs/training#disabling_interaction_logs",
+      "default": false
+    },
+    "disableStackdriverLogs": {
+      "$id": "/properties/disableStackdriverLogs",
+      "type": "boolean",
+      "title": "Disable Stackdriver Logs",
+      "default": false
+    },
+    "googleAssistant": {
+      "$id": "/properties/googleAssistant",
+      "type": "object",
+      "description": "Configuration for Google Assistant.  Note that I've not been able to find a spec on this config anywhere.",
+      "properties": {
+        "googleAssistantCompatible": {
+          "$id": "/properties/googleAssistant/properties/googleAssistantCompatible",
+          "type": "boolean",
+          "title": "Google Assistant Compatible",
+          "default": false
+        },
+        "welcomeIntentSignInRequired": {
+          "$id": "/properties/googleAssistant/properties/welcomeIntentSignInRequired",
+          "type": "boolean",
+          "title": "Welcome Intent Sign-in Required",
+          "default": false
+        },
+        "startIntents": {
+          "$id": "/properties/googleAssistant/properties/startIntents",
+          "type": "array",
+          "default": ["Launch"]
+        },
+        "systemIntents": {
+          "$id": "/properties/googleAssistant/properties/systemIntents",
+          "type": "array",
+          "default": []
+        },
+        "endIntentIds": {
+          "$id": "/properties/googleAssistant/properties/endIntentIds",
+          "type": "array",
+          "default": []
+        },
+        "oAuthLinking": {
+          "$id": "/properties/googleAssistant/properties/oAuthLinking",
+          "type": "object",
+          "title": "oAuth Linking",
+          "properties": {
+            "required": {
+              "$id": "/properties/googleAssistant/properties/oAuthLinking/properties/required",
+              "type": "boolean",
+              "title": "Required",
+              "default": false
+            },
+            "grantType": {
+              "$id": "/properties/googleAssistant/properties/oAuthLinking/properties/grantType",
+              "type": "string",
+              "title": "Grant Type",
+              "default": "AUTH_CODE_GRANT",
+              "examples": [
+                "AUTH_CODE_GRANT"
+              ]
+            }
+          }
+        },
+        "voiceType": {
+          "$id": "/properties/googleAssistant/properties/voiceType",
+          "type": "string",
+          "title": "Voice Type",
+          "default": "MALE_1",
+          "examples": [
+            "MALE_1"
+          ]
+        },
+        "capabilities": {
+          "$id": "/properties/googleAssistant/properties/capabilities",
+          "title": "Capabilities",
+          "type": "array",
+          "default": []
+        },
+        "protocolVersion": {
+          "$id": "/properties/googleAssistant/properties/protocolVersion",
+          "type": "string",
+          "title": "Protocol Version",
+          "default": "V2",
+          "examples": [
+            "V1",
+            "V2"
+          ]
+        },
+        "autoPreviewEnabled": {
+          "$id": "/properties/googleAssistant/properties/autoPreviewEnabled",
+          "type": "boolean",
+          "title": "Auto Preview Enabled",
+          "default": false
+        },
+        "isDeviceAgent": {
+          "$id": "/properties/googleAssistant/properties/isDeviceAgent",
+          "type": "boolean",
+          "title": "Is Device Agent",
+          "default": false
+        }
+      }
+    },
+    "defaultTimezone": {
+      "$id": "/properties/defaultTimezone",
+      "type": "string",
+      "title": "Default Timezone",
+      "description": "Corresponds to the default time zone set in the agent settings.",
+      "examples": [
+        "America/Los_Angeles"
+      ]
+    },
+    "webhook": {
+      "$id": "/properties/webhook",
+      "type": "object",
+      "title": "Webhook",
+      "description": "Webhook configuration for the agent.",
+      "properties": {
+        "url": {
+          "$id": "/properties/webhook/properties/url",
+          "type": "string",
+          "title": "URL",
+          "description": "The URL of the webhook.",
+          "default": "",
+          "examples": [
+            "https://my.webhook.com/"
+          ]
+        },
+        "headers": {
+          "$id": "/properties/webhook/properties/headers",
+          "type": "object",
+          "name": "Headers",
+          "description": "HTTP headers to be sent from Dialogflow to the agent.",
+          "patternProperties": {
+            ".*": {
+              "type": "string",
+              "title": "Header",
+              "description": "An HTTP header."
+            }
+          }
+        },
+        "available": {
+          "$id": "/properties/webhook/properties/available",
+          "type": "boolean",
+          "title": "Available",
+          "default": false
+        },
+        "useForDomains": {
+          "$id": "/properties/webhook/properties/useForDomains",
+          "type": "boolean",
+          "title": "Use For Domains",
+          "default": false
+        },
+        "cloudFunctionsEnabled": {
+          "$id": "/properties/webhook/properties/cloudFunctionsEnabled",
+          "type": "boolean",
+          "title": "Cloud Functions Enabled",
+          "default": false
+        },
+        "cloudFunctionsInitialized": {
+          "$id": "/properties/webhook/properties/cloudFunctionsInitialized",
+          "type": "boolean",
+          "title": "Cloud Functions Initialized",
+          "default": false
+        }
+      }
+    },
+    "isPrivate": {
+      "$id": "/properties/isPrivate",
+      "type": "boolean",
+      "title": "Is Private",
+      "description": "true if the 'Private' option is selected in the agent settings, false if the 'Public' option is selected.",
+      "default": false
+    },
+    "customClassifierMode": {
+      "$id": "/properties/customClassifierMode",
+      "type": "string",
+      "title": "Custom Classifier Mode",
+      "description": "Corresponds to the Match mode from the ML Settings.  See: https://dialogflow.com/docs/machine-learning#match_mode",
+      "default": "use.after",
+      "examples": [
+        "use.after"
+      ]
+    },
+    "mlMinConfidence": {
+      "$id": "/properties/mlMinConfidence",
+      "type": "number",
+      "title": "ML Min-Confidence",
+      "description": "Corresponds to the ML Classification Threshold.  See: https://dialogflow.com/docs/machine-learning#ml_classification_threshold",
+      "default": 0.3
+    },
+    "supportedLanguages": {
+      "$id": "/properties/supportedLanguages",
+      "type": "array",
+      "title": "Supported Languages",
+      "description": "List of root languages and locales the agent supports. See: https://dialogflow.com/docs/reference/language",
+      "default": []
+    },
+    "onePlatformApiVersion": {
+      "$id": "/properties/onePlatformApiVersion",
+      "type": ["string", "boolean"],
+      "title": "One Platform API Version",
+      "description": "true if agent uses V2 API, false if agent uses V1 API.",
+      "default": "v2",
+      "examples": [
+        "v1",
+        "v2",
+        true,
+        false
+      ]
+    },
+    "analyzeQueryTextSentiment": {
+      "$id": "/properties/analyzeQueryTextSentiment",
+      "type": "boolean",
+      "title": "Analyze Query Text Sentiment",
+      "default": false
+    }
+  }
+}

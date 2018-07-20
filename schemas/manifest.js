@@ -2,7 +2,11 @@
 
 const VERSION = '1.0';
 
-module.exports = {
+const defaults = require('json-schema-defaults'),
+      defaultify = require('../lib/defaultify');
+
+const schema = {
+  $schema: 'http://json-schema.org/draft-07/schema#',
   type: 'object',
   version: VERSION,
   required: [
@@ -10,22 +14,19 @@ module.exports = {
     'description',
     'outputDir'
   ],
-  $schema: 'http://json-schema.org/draft-07/schema#',
   properties: {
     version: {
       $id: '#/properties/version',
       type: 'string',
       title: 'Manifest Version',
       description: 'The version of the structure used in the manifest.  Not to be confused with the version of related applications.',
-      'default': VERSION,
+      default: VERSION,
       examples: [
         VERSION
       ]
     },
     description: {
-      type: [
-        'object'
-      ],
+      type: 'object',
       title: 'Description',
       description: 'A description of the application, used by platforms when publishing.',
       default: {},
@@ -36,7 +37,7 @@ module.exports = {
           ],
           title: 'Name',
           description: 'The display name of the application.',
-          'default': '',
+          default: '',
           examples: [
             'Hello World'
           ]
@@ -47,7 +48,7 @@ module.exports = {
           ],
           title: 'Short Summary',
           description: 'A short summary of the application.',
-          'default': '',
+          default: '',
           examples: [
             'Hello World says \'hello world\' to you.'
           ]
@@ -58,7 +59,7 @@ module.exports = {
           ],
           title: 'Long Summary',
           description: 'A longer summary of the application.',
-          'default': '',
+          default: '',
           examples: [
             'Hello World says \'hello world\' to you.'
           ]
@@ -140,6 +141,40 @@ module.exports = {
           ],
           default: ''
         },
+        smallIconUrl: {
+          $id: '#/properties/smallIconUrl',
+          type: [
+            'string'
+          ],
+          title: 'Small Icon URL',
+          description: 'A URL to a small icon image file.  Suggested dimensions: 192x192px',
+          examples: [
+            'https://storage.example/smallIcon.png'
+          ],
+          default: ''
+        },
+        largeIconUrl: {
+          $id: '#/properties/largeIconUrl',
+          type: [
+            'string'
+          ],
+          title: 'Large Icon URL',
+          description: 'A URL to a large icon image file.  Suggested dimensions: 512x512px',
+          examples: [
+            'https://storage.example/largeIcon.png'
+          ],
+          default: ''
+        },
+        bannerUrl: {
+          $id: '#/properties/bannerUrl',
+          type: [ 'string' ],
+          title: 'Banner URL',
+          description: 'A URL to a large banner image file.  Suggested dimensions: 1920x1080px',
+          examples: [
+            'https://storage.example/banner.png'
+          ],
+          default: ''
+        }
       }
     },
     targetPlatforms: {
@@ -186,47 +221,13 @@ module.exports = {
         ],
         title: 'Distribution Countries',
         description: 'A list if ISO 3166-2 abbreviations that tell platforms where to geographically make an application available.',
-        'default': [],
+        default: [],
         examples: [
           'US',
           'CA'
         ]
       },
       default: []
-    },
-    smallIconUrl: {
-      $id: '#/properties/smallIconUrl',
-      type: [
-        'string'
-      ],
-      title: 'Small Icon URL',
-      description: 'A URL to a small icon image file.  Suggested dimensions: 192x192px',
-      examples: [
-        'https://storage.example/smallIcon.png'
-      ],
-      default: ''
-    },
-    largeIconUrl: {
-      $id: '#/properties/largeIconUrl',
-      type: [
-        'string'
-      ],
-      title: 'Large Icon URL',
-      description: 'A URL to a large icon image file.  Suggested dimensions: 512x512px',
-      examples: [
-        'https://storage.example/largeIcon.png'
-      ],
-      default: ''
-    },
-    bannerUrl: {
-      $id: '#/properties/bannerUrl',
-      type: [ 'string' ],
-      title: 'Banner URL',
-      description: 'A URL to a large banner image file.  Suggested dimensions: 1920x1080px',
-      examples: [
-        'https://storage.example/banner.png'
-      ],
-      default: ''
     },
     isPrivate: {
       $id: '#/properties/isPrivate',
@@ -298,16 +299,14 @@ module.exports = {
       ],
       title: 'Output Directory',
       description: 'A directory path, relative to the location of the manifest, where built manifests and models will be written.  This directory doesn\'t have to exist prior to building.',
-      'default': './dist',
+      default: './dist',
       examples: [
         './dist'
       ]
     },
     apis: {
       $id: '#/properties/apis',
-      type: [
-        'object'
-      ],
+      type: 'object',
       additionalProperties: false,
       title: 'APIs',
       description: 'Defines a standard set of APIs for platforms to access the application.',
@@ -317,6 +316,10 @@ module.exports = {
           $ref: '#/definitions/api',
           title: 'Application',
           description: 'An API definition for an application with a custom interaction model.',
+          default: {
+            uri: '',
+            sslCertificateType: ''
+          }
         },
         feed: {
           $ref: '#/definitions/api',
@@ -344,18 +347,11 @@ module.exports = {
           description: 'An API definition for an application that integrates with a platform\'s video API.'
         }
       }
-    },
-    languageModel: (function(){
-      const modelSchema = require('./language-model');
-      modelSchema.description += '  This property is optional and can be used instead of a `bisque-manifest` file.  If a `bisque-manifest` file is present, that will always be used instead.';
-      return modelSchema;
-    })()
+    }
   },
   definitions: {
     api: {
-      type: [
-        'object'
-      ],
+      type: 'object',
       title: 'API',
       description: 'Defines a standard API for platforms to access the application.',
       properties: {
@@ -383,7 +379,7 @@ module.exports = {
           ],
           title: 'SSL Certificate Type',
           description: 'The type of SSL certificate used by the URI.',
-          'default': 'Wildcard',
+          default: 'Wildcard',
           examples: [
             'Trusted',
             'SelfSigned',
@@ -453,99 +449,31 @@ module.exports = {
           type: [
             'string'
           ],
-          anyOf: [
-            {
-              $ref: '#/definitions/resolver'
-            },
-            {
-              type: [
-                'string'
-              ]
-            }
-          ],
           title: 'Update Frequency',
-          'default': 'If applicable, the update frequency of the data returned from the API.  Usually used for a List API.',
+          default: 'If applicable, the update frequency of the data returned from the API.  Usually used for a List API.',
           examples: [
             'hourly'
+          ]
+        },
+        timezone: {
+          $id: '#/properties/application/properties/timezone',
+          type: [
+            'string'
+          ],
+          title: 'Time Zone',
+          default: 'The TZ code for the time zone of the API endpoint.',
+          examples: [
+            'America/Los_Angeles',
+            'Europe/Berlin',
+            'Asia/Tokyo'
           ]
         }
       }
     },
-    resolver: {
-      $id: '#/definitions/resolver',
-      type: 'object',
-      title: 'Resolver',
-      additionalProperties: false,
-      description: 'A resolver object is used to resolve a property based on different targets such as platform and locale.  For example, when building a manifest file to multiple platforms, a resolver object can be used to give a manifest property different values depending on the platform currently being built for.  A value set for a resolver property can also be another Resolver object.',
-      properties: {
-        'default': {
-          title: 'Default',
-          description: 'A default property value to always apply if not resolved by another resolver property such as `byLocale` or `byPlatform`.',
-          anyOf: [
-            {
-              not: {
-                type: 'object'
-              }
-            },
-            {
-              type: 'object',
-              not: {
-                required: [
-                  'default',
-                  'byLocale',
-                  'byPlatform'
-                ]
-              }
-            },
-            {
-              $ref: '#/definitions/resolver'
-            }
-          ]
-        },
-        byLocale: {
-          $id: '#/properties/byLocale',
-          title: 'By Locale',
-          type: 'object',
-          description: 'Resolves a property value based on the contextual locale being targeted.  This will not resolve for objects that are not locale-specific such as the manifest.',
-          patternProperties: {
-            '^[a-z]{2}\-[A-Z]{2}$': {
-              title: 'Locale-specific Value',
-              description: 'The locale-specific value to resolve to, the property name being an i18n locale code. (e.g. \'en-US\', \'de-DE\').',
-              anyOf: [
-                {
-                  not: {
-                    type: 'object'
-                  }
-                },
-                {
-                  $ref: '#/definitions/resolver'
-                }
-              ]
-            }
-          }
-        },
-        byPlatform: {
-          title: 'By Platform',
-          description: 'Resolves a property value based on the contextual platform being targeted.  This will not resolve if the context is not platform-specific.',
-          patternProperties: {
-            '^[a-z]*$': {
-              title: 'Platform-specific Value',
-              description: 'The platform-specific value to resolve to, the property name being the name of a platform in all-lowercase. (e.g. \'alexa\', \'dialogflow\').',
-              anyOf: [
-                {
-                  not: {
-                    type: 'object'
-                  }
-                },
-                {
-                  $ref: '#/definitions/resolver'
-                }
-              ]
-            }
-          }
-        }
-      }
-    }
+    resolver: require('./resolver')
   }
 };
 
+defaultify(schema);
+
+module.exports = schema;
