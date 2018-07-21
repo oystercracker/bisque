@@ -2,7 +2,10 @@ module.exports = {
   version: '1.0',
   description: {
     name: 'bisque',
-    shortSummary: '',
+    shortSummary(platform) {
+      if(platform === 'google') return 'goo goo';
+      return 'foo bar';
+    },
     longSummary: '',
     author: '',
     contactEmail: '',
@@ -15,7 +18,7 @@ module.exports = {
     largeIconUrl: '',
     bannerUrl: ''
   },
-  targetPlatforms: ['alexa', 'dialogflow'],
+  targetPlatforms: ['alexa', 'google', 'dialogflow'],
   targetLocales: ['en-US'],
   distributionCountries: [],
   isPrivate: true,

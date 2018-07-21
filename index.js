@@ -35,6 +35,12 @@ const { entries,
                 version: '1.0.0'
               }
             };
+          },
+          google(manifest, languageModels){
+            const { buildAction } = require('./lib/platforms/google');
+            const output = buildAction(manifest, languageModels);
+            output.dialogflow = builders.dialogflow(manifest, languageModels);
+            return output;
           }
         };
         

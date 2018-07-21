@@ -1,0 +1,83 @@
+{
+  "manifest": {
+    "displayName": "bisque",
+    "invocationName": "",
+    "category": "",
+    "voiceName": "female_1",
+    "shortDescription": "goo goo",
+    "longDescription": "",
+    "smallSquareLogoUrl": "",
+    "largeLandscapeLogoUrl": "",
+    "companyName": "",
+    "contactEmail": "",
+    "termsOfServiceUrl": "",
+    "privacyUrl": "",
+    "sampleInvocation": [],
+    "introduction": "",
+    "surfaceRequirements": {}
+  },
+  "accountLinking": {},
+  "actions": [
+    {
+      "description": "Default Welcome Intent",
+      "name": "actions_intent_MAIN",
+      "fulfillment": {
+        "conversationName": "api.ai"
+      },
+      "intent": {
+        "name": "actions.intent.MAIN"
+      }
+    }
+  ],
+  "types": [
+    {
+      "name": "$FooBar",
+      "entities": [
+        {
+          "key": "bleh",
+          "synonyms": [
+            "caca",
+            "flarp"
+          ]
+        }
+      ]
+    }
+  ],
+  "conversations": {
+    "api.ai": {
+      "inDialogIntents": [
+        {
+          "name": "b79cac92-e0b2-447e-8cc9-d5174037c9e1",
+          "parameters": [
+            {
+              "name": "foo",
+              "type": "FooBar"
+            }
+          ],
+          "trigger": {
+            "queryPatterns": [
+              "i like $FooBar:foo"
+            ]
+          }
+        },
+        {
+          "name": "RAW_TEXT",
+          "parameters": [
+            {
+              "name": "text",
+              "type": "SchemaOrg_Text"
+            }
+          ],
+          "trigger": {
+            "queryPatterns": [
+              "$SchemaOrg_Text:text"
+            ]
+          }
+        }
+      ],
+      "url": "https://api.api.ai/api/integrations/google?token=2eb5f485a1cc4080b445c0f8070032bb",
+      "fulfillmentApiVersion": 2
+    }
+  },
+  "locale": "en"
+}
