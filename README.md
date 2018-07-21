@@ -6,7 +6,7 @@ Write your language model once and cross-compile it for Alexa and Google/Dialogf
 ## Installation
 
 ```sh
-npm install -g bisquejs
+npm install -g bisque.js
 ```
 
 ## Getting started
@@ -18,6 +18,8 @@ Before you begin using Bisque, you should familiarize yourself with the concept 
 ```sh
 bisque init
 ```
+
+You'll be asked some basic questions for setup.
 
 A new file will appear in the current working directory called `manifest.js`.  This is a CommonJS module that represents your 
 
@@ -501,6 +503,10 @@ const languageModel = {
   },
 // ...
 ```
+
+## Documentation
+
+Currently, the documentation is restricted to the [JSON schema files]() and this readme.  Hopefully this will change if I can find a JSON schema document generator that isn't a piece of garbage.
 
 ## License
 

@@ -183,9 +183,10 @@ module.exports = {
                   },
                   synonyms: {
                     type: 'array',
-                    title: 'Slot Type Value Synonym',
+                    title: 'Slot Type Value Synonyms',
                     items: {
                       type: 'string',
+                      title: 'Slot Type Value Synonyms',
                       examples: [
                         'chocolate',
                         'choco',

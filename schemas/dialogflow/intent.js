@@ -143,8 +143,7 @@ module.exports = {
               google: {
                 $id: '/properties/responses/items/properties/defaultResponsePlatforms/properties/google',
                 type: 'boolean',
-                title: 'Google',
-                default: false
+                title: 'Google'
               }
             }
           },

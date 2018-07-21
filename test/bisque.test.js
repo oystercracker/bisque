@@ -4,13 +4,17 @@ const { assert }        = require('chai'),
         bisque          = require('../bin/bisque'),
       { rmrf,
         captureStdout } = require('../lib/utils'),
+        glob            = require('glob'),
       { mkdirSync }     = require('fs'),
         Validator       = require('ajv'),
         manifestSchema  = require('../schemas/manifest'),
         modelSchema     = require('../schemas/language-model'),
-        skillSchema     = require('../schemas/alexa/skill.json'),
-        dialogflowAgentSchema = require('../schemas/dialogflow/agent.json'),
-        TEST_DIRECTORY  = `${__dirname}/../tmp/test/`;
+        alexaManifestSchema      = require('../schemas/alexa/skill.json'),
+        alexaModelSchema         = require('../schemas/alexa/model.json'),
+        dialogflowAgentSchema    = require('../schemas/dialogflow/agent.json'),
+        dialogflowIntentSchema   = require('../schemas/dialogflow/intent'),
+        dialogflowUsersaysSchema = require('../schemas/dialogflow/usersays'),
+        TEST_DIRECTORY           = `${__dirname}/../tmp/test/`;
 
 function clearTmpFiles(){
   try {
@@ -105,53 +109,77 @@ describe('bisque', function(){
         assert.notExists(validator.errors);
       });
 
+      it('builds valid intent files', async function(){
+        await bisque.init({y: true, a: 'foobar', platforms: 'dialogflow', locales: 'en-US, de-DE, fr-FR'});
+        await bisque.build();
+        const intents = glob.sync(`${TEST_DIRECTORY}/dist/dialogflow/intents/*.json`)
+                            .filter(x => x.match(/intents\/[a-zA-Z]+\.json/));
+        assert.notEmpty(intents);
+        intents.forEach(filepath => {
+          const intent    = require(filepath),
+                validator = new Validator();
+          validator.validate(dialogflowIntentSchema, intent);
+          debugger
+          assert.notExists(validator.errors);
+        });
+        const usersays = glob.sync(`${TEST_DIRECTORY}/dist/dialogflow/intents/*_usersays_*.json`);
+        assert.notEmpty(usersays);
+        usersays.forEach(filepath => {
+          const usersays  = require(filepath),
+                validator = new Validator();
+          validator.validate(dialogflowUsersaysSchema, usersays);
+          assert.notExists(validator.errors);
+        });
+      });
+
     });
 
-    // describe('alexa', function(){
+    describe('alexa', function(){
 
-    //   // before(async () => {
-    //     // clearTmpFiles();
-    //     // process.chdir(TEST_DIRECTORY);
-    //     // const locales = ['en-US', 'de-DE', 'fr-FR'];
-    //     // await bisque.init({y: true, a: 'foobar', platforms: 'alexa', locales: locales.join(', ')});
-    //     // await bisque.build();
-    //   // });
+      // before(async () => {
+        // clearTmpFiles();
+        // process.chdir(TEST_DIRECTORY);
+        // const locales = ['en-US', 'de-DE', 'fr-FR'];
+        // await bisque.init({y: true, a: 'foobar', platforms: 'alexa', locales: locales.join(', ')});
+        // await bisque.build();
+      // });
   
-    //   beforeEach(() => {
-    //     clearTmpFiles();
-    //     process.chdir(TEST_DIRECTORY);
-    //   });
+      beforeEach(() => {
+        clearTmpFiles();
+        process.chdir(TEST_DIRECTORY);
+      });
 
-    //   it('builds a valid skill.json manifest file', async function(){
-    //     await bisque.init({y: true, a: 'foobar', platforms: 'alexa'});
-    //     await bisque.build();
-    //     const skill     = require(`${TEST_DIRECTORY}/dist/alexa/skill`),
-    //           validator = new Validator();
-    //     validator.validate(skillSchema, skill);
-    //     assert.notExists(validator.errors);
-    //   });
+      it('builds a valid skill.json manifest file', async function(){
+        await bisque.init({y: true, a: 'foobar', platforms: 'alexa'});
+        await bisque.build();
+        const skill     = require(`${TEST_DIRECTORY}/dist/alexa/skill`),
+              validator = new Validator();
+        validator.validate(alexaManifestSchema, skill);
+        assert.notExists(validator.errors);
+      });
 
-    //   // it('builds language model files for the specified locales', async function(){
-    //   //   const locales = ['en-US', 'de-DE', 'fr-FR'];
-    //   //   locales.forEach(locale => {
-    //   //     const model     = require(`${TEST_DIRECTORY}/dist/alexa/models/${locale}.json`),
-    //   //           validator = new Validator();
-    //   //     validator.validate(modelSchema, model);
-    //   //     assert.notExists(validator.errors);
-    //   //   });
-    //   // });
+      it('builds language model files for the specified locales', async function(){
+        const locales = ['en-US', 'de-DE', 'fr-FR'];
+        await bisque.init({y: true, a: 'foobar', platforms: 'alexa', locales: locales.join(', ')});
+        await bisque.build();
+        locales.forEach(locale => {
+          const model     = require(`${TEST_DIRECTORY}/dist/alexa/models/${locale}.json`),
+                validator = new Validator();
+          validator.validate(alexaModelSchema, model);
+          assert.notExists(validator.errors);
+        });
+      });
 
-    //   it('fails to build language models if the required intents are not accounted for', async function(){
-    //     clearTmpFiles();
-    //     process.chdir(TEST_DIRECTORY);
-    //     const locales = ['en-US', 'de-DE', 'fr-FR'];
-    //     await bisque.init({y: true, a: 'foobar', platforms: 'alexa', locales: locales.join(', ')});
-    //     const { errors, output } = await captureStdout(async () => await bisque.build());
-    //     assert.match(errors, /Language model failed to output Alexa model with required built-in intent/);
-    //   });
+      // it('fails to build language models if the required intents are not accounted for', async function(){
+      //   clearTmpFiles();
+      //   process.chdir(TEST_DIRECTORY);
+      //   const locales = ['en-US', 'de-DE', 'fr-FR'];
+      //   await bisque.init({y: true, a: 'foobar', platforms: 'alexa', locales: locales.join(', ')});
+      //   const { errors, output } = await captureStdout(async () => await bisque.build());
+      //   assert.match(errors, /Language model failed to output Alexa model with required built-in intent/);
+      // });
 
-
-    // });
+    });
 
   });
 

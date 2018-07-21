@@ -1,11 +1,8 @@
 'use strict';
 
-const { entries,
-        assign,
-        keys }         = Object,
+const { entries }         = Object,
         ConfigObject   = require('./lib/config-object'),
         AJV            = require('ajv'),
-        defaults       = require('json-schema-defaults'),
         builders = {
           alexa(manifest, languageModels){
             const { buildManifest, buildModel } = require('./lib/platforms/alexa');
@@ -24,7 +21,6 @@ const { entries,
                     buildIntents,
                     buildEntities }    = require('./lib/platforms/dialogflow'),
                     dialogflowManifest = buildManifest(manifest),
-                    languages          = dialogflowManifest.languages,
                     intents            = buildIntents(manifest, languageModels),
                     entities           = buildEntities(manifest, languageModels);
             return {

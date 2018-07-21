@@ -22,35 +22,45 @@ function help(){
       validate           Validates the manifest and language model.
       build              Build out platform-specific models and manifests.
       generate           Generate an element of the language model.
+      implement          Apply platform-specific config to manifest and models.
       help               Shows help text.
     Version: ${packageJSON.version}
   `);
 }
 
-// function applyAlexaMapping(){
-//   const manifest = readFileSync(`${process.cwd()}/bisque-model.js`, 'utf8'),
-//         astley   = Astley.from(manifest),
-//         node = astley.search(n => n.parent.key.name == 'intents' && n.type == 'ObjectExpression')[0],
-//         intentMap = {
-//           Stop: 'AMAZON.StopIntent',
-//           Cancel: 'AMAZON.CancelIntent',
-//           Help: 'AMAZON.HelpIntent',
-//           Fallback: 'AMAZON.FallbackIntent'
-//         },
-//         basicIntents = Object.keys(intentMap);
-//   if(!node) return;
-//   node.properties.forEach(p => {
-//     if(!p.value || p.value.type !== 'ObjectExpression') return;
-//     if(!basicIntents.find(i => i === p.key.name)) return;
-//     if(!p.value.properties.some(p => p.key.name === 'alias')){
-//       const n = new Astley(p.value);
-//       n.prop('alias', '');
-//     }
-//     const aliasProp = p.value.properties.find(p => p.key.name === 'alias');
-//     if(!aliasProp) return;
-//     debugger
-//   });
-// }
+function implementAlexa(){
+  const manifest = readFileSync(`${process.cwd()}/bisque-model.js`, 'utf8'),
+        astley   = Astley.from(manifest),
+        node = astley.search(n => n.parent.key.name == 'intents' && n.type == 'ObjectExpression')[0],
+        intentMap = {
+          Stop:     'AMAZON.StopIntent',
+          Cancel:   'AMAZON.CancelIntent',
+          Help:     'AMAZON.HelpIntent',
+          Fallback: 'AMAZON.FallbackIntent'
+        },
+        basicIntents = Object.keys(intentMap);
+  if(!node) return;
+  node.properties.forEach(p => {
+    if(!p.value || p.value.type !== 'ObjectExpression') return;
+    const intentName = p.key.name;
+    if(!basicIntents.find(i => i === intentName)) return;
+    if(!p.value.properties.some(p => p.key.name === 'alias')){
+      const val = new Astley(p.value);
+      val.prop('alias', {});
+    }
+    const aliasObject = p.value.properties.find(p => p.key.name === 'alias');
+    if(aliasObject.value && aliasObject.value.type !== 'ObjectExpression') return;
+    const alias = new Astley(aliasObject.value)[0];
+    if(!alias.properties.some(p => p.key.name === 'byPlatform')){
+      alias.prop('byPlatform', {});
+    }
+    const byPlatform = alias.search(a => a.parent.key.name === 'byPlatform' && a.type === 'ObjectExpression');
+    byPlatform.prop('alexa', intentMap[intentName]);
+  });
+  writeFileSync(`${process.cwd()}/bisque-model.js`, astley.toString(), 'utf8');
+}
+
+
 
 /**
  * Initializes a new set of Bisuqe manifest and model files.
@@ -84,6 +94,7 @@ async function init({ y: skipQuestions, a: appName, platforms= '', locales='' })
   } else {
     console.log('bisque-model.js already exists');
   }
+  if(platforms.match(/alexa/)) implementAlexa();
   rp.close();
 }
 /**

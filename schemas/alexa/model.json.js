@@ -16,7 +16,7 @@ module.exports = {
               $id: '/properties/interactionModel/properties/languageModel/properties/invocationName',
               type: 'string',
               title: 'The Invocationname Schema ',
-              'default': '',
+              default: '',
               examples: [
                 'my space facts'
               ]
@@ -32,7 +32,7 @@ module.exports = {
                     $id: '/properties/interactionModel/properties/languageModel/properties/intents/items/properties/name',
                     type: 'string',
                     title: 'The Name Schema ',
-                    'default': '',
+                    default: '',
                     examples: [
                       'AMAZON.CancelIntent'
                     ]
@@ -55,7 +55,7 @@ module.exports = {
                     $id: '/properties/interactionModel/properties/languageModel/properties/types/items/properties/name',
                     type: 'string',
                     title: 'The Name Schema ',
-                    'default': '',
+                    default: '',
                     examples: [
                       'Planet'
                     ]
@@ -75,7 +75,7 @@ module.exports = {
                               $id: '/properties/interactionModel/properties/languageModel/properties/types/items/properties/values/items/properties/name/properties/value',
                               type: 'string',
                               title: 'The Value Schema ',
-                              'default': '',
+                              default: '',
                               examples: [
                                 'Mercury'
                               ]
@@ -105,7 +105,7 @@ module.exports = {
                     $id: '/properties/interactionModel/properties/dialog/properties/intents/items/properties/name',
                     type: 'string',
                     title: 'The Name Schema ',
-                    'default': '',
+                    default: '',
                     examples: [
                       'GetTravelTime'
                     ]
@@ -114,7 +114,7 @@ module.exports = {
                     $id: '/properties/interactionModel/properties/dialog/properties/intents/items/properties/confirmationRequired',
                     type: 'boolean',
                     title: 'The Confirmationrequired Schema ',
-                    'default': false,
+                    default: false,
                     examples: [
                       false
                     ]
@@ -134,7 +134,7 @@ module.exports = {
                           $id: '/properties/interactionModel/properties/dialog/properties/intents/items/properties/slots/items/properties/name',
                           type: 'string',
                           title: 'The Name Schema ',
-                          'default': '',
+                          default: '',
                           examples: [
                             'DepartingPlanet'
                           ]
@@ -143,7 +143,7 @@ module.exports = {
                           $id: '/properties/interactionModel/properties/dialog/properties/intents/items/properties/slots/items/properties/type',
                           type: 'string',
                           title: 'The Type Schema ',
-                          'default': '',
+                          default: '',
                           examples: [
                             'Planet'
                           ]
@@ -152,7 +152,7 @@ module.exports = {
                           $id: '/properties/interactionModel/properties/dialog/properties/intents/items/properties/slots/items/properties/confirmationRequired',
                           type: 'boolean',
                           title: 'The Confirmationrequired Schema ',
-                          'default': false,
+                          default: false,
                           examples: [
                             false
                           ]
@@ -161,7 +161,7 @@ module.exports = {
                           $id: '/properties/interactionModel/properties/dialog/properties/intents/items/properties/slots/items/properties/elicitationRequired',
                           type: 'boolean',
                           title: 'The Elicitationrequired Schema ',
-                          'default': false,
+                          default: false,
                           examples: [
                             true
                           ]
@@ -174,7 +174,7 @@ module.exports = {
                               $id: '/properties/interactionModel/properties/dialog/properties/intents/items/properties/slots/items/properties/prompts/properties/elicitation',
                               type: 'string',
                               title: 'The Elicitation Schema ',
-                              'default': '',
+                              default: '',
                               examples: [
                                 'Elicit.Intent-GetTravelTime.IntentSlot-DepartingPlanet'
                               ]
@@ -200,7 +200,7 @@ module.exports = {
                 $id: '/properties/interactionModel/properties/prompts/items/properties/id',
                 type: 'string',
                 title: 'The Id Schema ',
-                'default': '',
+                default: '',
                 examples: [
                   'Elicit.Intent-GetTravelTime.IntentSlot-DepartingPlanet'
                 ]
@@ -216,7 +216,7 @@ module.exports = {
                       $id: '/properties/interactionModel/properties/prompts/items/properties/variations/items/properties/type',
                       type: 'string',
                       title: 'The Type Schema ',
-                      'default': '',
+                      default: '',
                       examples: [
                         'PlainText'
                       ]
@@ -225,7 +225,7 @@ module.exports = {
                       $id: '/properties/interactionModel/properties/prompts/items/properties/variations/items/properties/value',
                       type: 'string',
                       title: 'The Value Schema ',
-                      'default': '',
+                      default: '',
                       examples: [
                         'Which planet are you starting from?'
                       ]
