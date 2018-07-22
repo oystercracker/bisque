@@ -9,11 +9,29 @@ const schema = {
   $schema: 'http://json-schema.org/draft-07/schema#',
   type: 'object',
   version: VERSION,
+  title: 'Bisque Manifest',
+  description: `The manifest contains settings used for generating platform-specific data files.  It\'s also useful for an application to use in order to implement features such as intent-aliasing.  Every property in the manifest is capable if being set to either a [function]() or a [resolver]() object, which allows properties to have different values depending on the target platform.`,
   required: [
     'version',
     'description',
-    'outputDir'
+    'outputDir',
+    'apis',
+    'isPrivate'
   ],
+  examples: [{
+    version: '1.0',
+    description: {
+      name: 'hello world',
+      shortSummary: 'an app that says hello world',
+      author: 'me'
+    },
+    isPrivate: true,
+    outputDir: './dist',
+    apis: {
+      uri: 'https://some.website/api',
+      sslCertificateType: 'wildcard'
+    }
+  }],
   properties: {
     version: {
       $id: '#/properties/version',
@@ -28,8 +46,14 @@ const schema = {
     description: {
       type: 'object',
       title: 'Description',
-      description: 'A description of the application, used by platforms when publishing.',
+      description: 'Descriptive information about the application to be used by platforms when publishing.',
       default: {},
+      required: ['name', 'shortSummary', 'author'],
+      examples: [{
+        name: 'hello world',
+        shortSummary: 'an app that says hello world',
+        author: 'me'
+      }],
       properties: {
         name: {
           type: [
@@ -186,7 +210,8 @@ const schema = {
         description: 'Platforms to build manifests and models for.  (e.g. alexa, dialogflow)',
         examples: [
           'alexa',
-          'dialogflow'
+          'dialogflow',
+          'google'
         ]
       },
       default: []
@@ -215,10 +240,7 @@ const schema = {
       type: [ 'array' ],
       items: {
         $id: '#/properties/distributionCountries/items',
-        type: [
-          'string',
-          'object'
-        ],
+        type: 'string',
         title: 'Distribution Countries',
         description: 'A list if ISO 3166-2 abbreviations that tell platforms where to geographically make an application available.',
         default: [],
@@ -310,16 +332,11 @@ const schema = {
       additionalProperties: false,
       title: 'APIs',
       description: 'Defines a standard set of APIs for platforms to access the application.',
-      default: {},
       properties: {
         application: {
           $ref: '#/definitions/api',
           title: 'Application',
-          description: 'An API definition for an application with a custom interaction model.',
-          default: {
-            uri: '',
-            sslCertificateType: ''
-          }
+          description: 'An API definition for an application with a custom interaction model.'
         },
         feed: {
           $ref: '#/definitions/api',
@@ -450,7 +467,7 @@ const schema = {
             'string'
           ],
           title: 'Update Frequency',
-          default: 'If applicable, the update frequency of the data returned from the API.  Usually used for a List API.',
+          description: 'If applicable, the update frequency of the data returned from the API.  Usually used for a List API.',
           examples: [
             'hourly'
           ]
@@ -461,7 +478,7 @@ const schema = {
             'string'
           ],
           title: 'Time Zone',
-          default: 'The TZ code for the time zone of the API endpoint.',
+          description: 'The TZ code for the time zone of the API endpoint.',
           examples: [
             'America/Los_Angeles',
             'Europe/Berlin',

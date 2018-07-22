@@ -28,6 +28,10 @@ function help(){
   `);
 }
 
+function implement({ b: platform }){
+  if(platform === 'alexa') implementAlexa();
+}
+
 function implementAlexa(){
   const manifest = readFileSync(`${process.cwd()}/bisque-model.js`, 'utf8'),
         astley   = Astley.from(manifest),
@@ -197,7 +201,8 @@ const functions = {
         generate,
         help,
         validate,
-        inspectSchema
+        inspectSchema,
+        implement
       },
       args = require('minimist')(process.argv.slice(2)),
       isBeingRequired = module.parent;
