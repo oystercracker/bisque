@@ -3,12 +3,14 @@
   "version": "1.0.0",
   "description": "",
   "main": "index.js",
+  "bin" : {
+    "bisque": "./bin/bisque"
+  },
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1",
-    "prepare": "mkdir -p docs/reference && node_modules/.bin/jsonschema2md -e js -o docs/reference -d schemas/"
+    "test": "echo \"Error: no test specified\" && exit 1"
   },
   "author": "",
-  "license": "ISC",
+  "license": "MIT",
   "devDependencies": {
     "chai": "^4.1.2",
     "glob": "^7.1.2",
@@ -21,7 +23,6 @@
     "astley": "^1.1.0",
     "javascript-stringify": "^1.6.0",
     "json-schema-defaults": "chrisdostert/json-schema-defaults#265263bdbe76cf905d186426f44e89e16d4abd86",
-    "keypather": "^3.0.0",
     "minimist": "^1.2.0"
   }
 }
