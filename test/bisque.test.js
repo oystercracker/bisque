@@ -84,8 +84,8 @@ describe('bisque', function(){
         bisque.validate() 
       });
       assert.notExists(output);
-      assert.match(errors, /Manifest file is expected but not found./);
-      assert.match(errors, /Language model file is expected but not found./);
+      assert.match(errors, /Expected a manifest but none provided./);
+      assert.match(errors, /Expected a language model but none provided/);
     });
 
   });

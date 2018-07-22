@@ -3,6 +3,7 @@ module.exports = {
   sampleInvocations: [],
   intents: {
     Help: {
+      alias: 'AMAZON.HelpIntent',
       patterns: [
         'i like {foo}'
       ],

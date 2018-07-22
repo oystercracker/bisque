@@ -68,7 +68,7 @@ module.exports = {
           description: 'An intent as specified by a property name.  The name should follow PascalCase with no spaces.',
           properties: {
             alias: {
-              type: 'string',
+              type: ['array', 'string'],
               title: 'Alias',
               description: 'Indicates to an application reading the manifest that it should treat the intent as if it\'s another intent.  This is useful for mapping a custom intent to platform-specific intents, unifying their behavior.  When used, the alias-value will be used in place of the actual intent name inside built-out models.'
             },

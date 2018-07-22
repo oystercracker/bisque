@@ -2,44 +2,15 @@
 
 const { entries }         = Object,
         ConfigObject   = require('./lib/config-object'),
-        AJV            = require('ajv'),
-        builders = {
-          alexa(manifest, languageModels){
-            const { buildManifest, buildModel } = require('./lib/platforms/alexa');
-            const alexaManifest  = buildManifest(manifest),
-                  modelsByLocale = {};
-            entries(languageModels).forEach(([locale, model]) => {
-              modelsByLocale[`${locale}.json`] = buildModel(manifest, model, locale);
-            });
-            return {
-              'skill.json': alexaManifest,
-              models: modelsByLocale
-            };
-          },
-          dialogflow(manifest, languageModels){
-            const { buildManifest, 
-                    buildIntents,
-                    buildEntities }    = require('./lib/platforms/dialogflow'),
-                    dialogflowManifest = buildManifest(manifest),
-                    intents            = buildIntents(manifest, languageModels),
-                    entities           = buildEntities(manifest, languageModels);
-            return {
-              'agent.json': dialogflowManifest,
-              intents,
-              entities,
-              'package.json': {
-                version: '1.0.0'
-              }
-            };
-          },
-          google(manifest, languageModels){
-            const { buildAction } = require('./lib/platforms/google');
-            const output = buildAction(manifest, languageModels);
-            output.dialogflow = builders.dialogflow(manifest, languageModels);
-            return output;
-          }
-        };
-        
+        AJV            = require('ajv');
+
+
+/**
+ * Builds out a resolved manifest and language models for a given platform.
+ */
+function build(platform, { manifest, languageModels }){
+  return require(`./lib/platforms/${platform}`)(manifest, languageModels);
+}
 
 function validate(schema, object){
   const validator = new AJV(),
@@ -59,7 +30,8 @@ function expandAssets(manifest, languageModel){
   const errors          = [],
         assets          = {},
         output          = { errors, assets };
-  if(!manifest)    errors.push('Expected a manifest but none provided.');
+  if(!manifest)      errors.push('Expected a manifest but none provided.');
+  if(!languageModel) errors.push('Expected a language model but none provided.');
   if(errors.length) return output;
   const targetPlatforms = ConfigObject.resolve(manifest).get('targetPlatforms', []);
   if(!targetPlatforms.length) errors.push('Provided manifest has no platform targets.');
@@ -91,12 +63,9 @@ function expandAssets(manifest, languageModel){
   return output;
 }
 
-function build(platform, { manifest, languageModels }){
-  return builders[platform](manifest, languageModels);
-}
-
 module.exports = {
   build,
-  expandAssets
+  expandAssets,
+  ConfigObject
 };
 

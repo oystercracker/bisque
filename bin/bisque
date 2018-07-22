@@ -7,8 +7,8 @@ const { entries }      = Object,
       { writeFileSync,
         mkdirSync,
         existsSync,
-        readFileSync } = require('fs'),
-        Astley         = require('astley'),
+        readFileSync }  = require('fs'),
+        Astley          = require('astley'),
       { rmrf,
         isPlainObject } = require('../lib/utils');
 
@@ -21,7 +21,6 @@ function help(){
       init               Create a new manifest file w/ language model.
       validate           Validates the manifest and language model.
       build              Build out platform-specific models and manifests.
-      generate           Generate an element of the language model.
       implement          Apply platform-specific config to manifest and models.
       help               Shows help text.
     Version: ${packageJSON.version}
@@ -29,6 +28,13 @@ function help(){
 }
 
 function implement({ b: platform }){
+  const packageJSON = require('../package.json');
+  if(!platform) return console.log(`
+    Usage:  bisque implement PLATFORM
+    Implement code requirements for a specific platform.
+    Available Platforms: alexa, google, dialogflow
+    Version: ${packageJSON.version}
+  `);
   if(platform === 'alexa') implementAlexa();
 }
 
@@ -134,8 +140,6 @@ function expand(){
         { manifest,
           languageModel } = loadAssets(),
           errors          = [];
-  if(!manifest)      errors.push('Manifest file is expected but not found.');
-  if(!languageModel) errors.push('Language model file is expected but not found.');
   if(errors.length) return { errors };
   return expandAssets(manifest, languageModel);
 }
@@ -144,13 +148,6 @@ async function validate(){
   const { errors } = expand();
   if(errors) return console.error(errors.join('\n'));
   console.log('Manifest and language model are valid.');
-}
-
-function generate(args){
-  // const recast         = require('recast'),
-  //     { readFileSync } = require('fs'),
-  //       source         = readFileSync(`${process.cwd()}/bisque-model.js`, 'utf8'),
-  //       ast            = recast.parse(source);
 }
 
 function build(){
@@ -198,7 +195,6 @@ function inspectSchema(args){
 const functions = {
         init,
         build,
-        generate,
         help,
         validate,
         inspectSchema,
