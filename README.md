@@ -364,22 +364,24 @@ const languageModel = {
 ```
 
 
-## Mapping intents to request types (Alexa only)
+## Mapping intents to request properties
 
-The Alexa platform has a concept of [request types](https://developer.amazon.com/docs/custom-skills/request-types-reference.html).  It can be useful to map an intent to a request type so your application can read your manifest and know to treat a certain request type as an intent.  This can be an important feature if one platform implements a behavior through a request type while another does so through a built-in intent; one example of this is how Alexa implements a `LaunchRequest` as a request type while Google/Dialogflow uses a "Default Welcome Intent".  Here's one way you can create a unified `Launch` intent that works between both platforms:
+In some cases, such as really simple applications, it may be preferable to treat a certain type of request as if it is a form of intent.  For example, Alexa platform has a concept of [request types](https://developer.amazon.com/docs/custom-skills/request-types-reference.html).  It can be useful to map an intent to a request type so an application can parse its Bisque manifest and know to treat a certain request type as an intent.  This can be an important feature if one platform implements a behavior through a request type while another does so through a built-in intent or an event; one example of this is how Alexa implements a `LaunchRequest` as a request type while Dialogflow uses a "Default Welcome Intent" which gets triggered by the `GOOGLE_ASSISTANT_WELCOME` event that comes from Google.  Here's one way you can create a unified `Launch` intent that works between both platforms:
 
 ```javascript
 const languageModel = {
   intents: {
     Launch: {
-      mapToRequestType: {
+      mapToRequestProperty: {
         byPlatform: {
-          alexa: 'LaunchRequest'
-        }
-      },
-      alias: {
-        byPlatform: {
-          google: 'Default Welcome Intent'
+          alexa: {
+            key: 'request.type',
+            value: 'LaunchRequest'
+          },
+          google: {
+            key:   'queryResult.action',
+            value: 'input.welcome'
+          }
         }
       }
     }
@@ -388,10 +390,27 @@ const languageModel = {
 // ...
 ```
 
-Note that you do not actually need the `alias` property if you rename your "Default Welcome Intent" to "Launch" in Dialogflow.
+Here's what it would look like using a function: 
 
-The result of this configuration is that the `Launch` intent will not be written out to generated Alexa or Dialogflow language models, since the intent is only an *alias* that will be applied by an application that reads `manifest.js`.
-
+```javascript
+const languageModel = {
+  intents: {
+    Launch: {
+      mapToRequestProperty(platform){
+        if(platform === 'alexa') return {
+          key: 'request.type',
+          value: 'LaunchRequest'
+        };
+        if(platform === 'dialogflow') return {
+          key: 'queryResult.action',
+          value: 'input.welcome'
+        };
+      }
+    }
+  }
+};
+// ...
+```
 
 ## Adding slots
 

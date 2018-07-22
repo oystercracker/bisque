@@ -72,10 +72,26 @@ module.exports = {
               title: 'Alias',
               description: 'Indicates to an application reading the manifest that it should treat the intent as if it\'s another intent.  This is useful for mapping a custom intent to platform-specific intents, unifying their behavior.  When used, the alias-value will be used in place of the actual intent name inside built-out models.'
             },
-            mapToRequestType: {
-              type: 'string',
-              title: 'Map To Request Type',
-              description: 'Indicates to an application reading the manifest that a request type should be treated as the intent.  Currently, this concept only works with Alexa.'
+            mapToRequestProperty: {
+              type: 'object',
+              title: 'Map To Request Property',
+              description: 'Tells an application to treat the presence of a property in a platform request body as if it\'s the current intent.',
+              properties: {
+                key: {
+                  type: 'string',
+                  title: 'Key',
+                  description: 'A dot-notation string that represents a key path to a value in a platform request.'
+                },
+                value: {
+                  type: 'string',
+                  title: 'Value',
+                  description: 'A regex-string to match a property value.'
+                }
+              },
+              examples: [{
+                key: 'request.type',
+                value: 'LaunchRequest'
+              }]
             },
             patterns: {
               type: 'array',

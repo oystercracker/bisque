@@ -2,8 +2,15 @@ module.exports = {
   invocation: '',
   sampleInvocations: [],
   intents: {
+    Hello: {
+
+    },
     Help: {
       alias: 'AMAZON.HelpIntent',
+      mapToRequestProperty: {
+        key: 'type',
+        value: 'LaunchRequest'
+      },
       patterns: [
         'i like {foo}'
       ],
